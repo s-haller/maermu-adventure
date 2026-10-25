@@ -11,6 +11,14 @@
       <div id="game">
         <div id="stage">
           <canvas id="scene" width="640" height="360"></canvas>
+          <div id="menu">
+            <div id="menu-panel">
+              <h1>Märmu</h1>
+              <p id="menu-lead">Choose a chapter.</p>
+              <button id="continue-chapter" type="button" hidden>Continue</button>
+              <div id="chapters"></div>
+            </div>
+          </div>
           <div id="letter" hidden>
             <article id="paper">
               <h1 id="letter-heading"></h1>
@@ -26,6 +34,7 @@
             <img id="letter-icon" alt="" width="32" height="32" />
             <span>letter</span>
           </button>
+          <button id="to-menu" type="button">Menu</button>
         </div>
       </div>
     </div>

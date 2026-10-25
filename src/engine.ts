@@ -1,4 +1,5 @@
 import { loadImage, loadSprites } from "./assets";
+import { chapters, type Chapter } from "./story/chapters";
 import { letter } from "./story/letter";
 import { Player } from "./player";
 import { getScene } from "./scenes";
@@ -20,6 +21,10 @@ export type GameUi = {
   letterHeading: HTMLElement;
   letterBody: HTMLElement;
   letterClose: HTMLButtonElement;
+  menu: HTMLElement;
+  chapters: HTMLElement;
+  continueChapter: HTMLButtonElement;
+  toMenu: HTMLButtonElement;
 };
 
 export class Game {
@@ -45,6 +50,10 @@ export class Game {
   private shading: "out" | "in" | "hold" | null = null;
   private pending: (() => void) | null = null;
   private letterOpen = false;
+  private onMenu = true;
+  private startingChapter = false;
+  private chapter: Chapter | null = null;
+  private savedMessage = "";
   private last = performance.now();
   private verbButtons = new Map<Verb, HTMLButtonElement>();
 
@@ -67,9 +76,32 @@ export class Game {
     this.player = new Player(sprites);
     this.player.footPad = footPad;
     this.ui.letterIcon.src = "/art/letter.png";
-    await this.enter(this.scene, true);
+    this.buildMenu();
+    this.background = await loadImage(getScene(chapters[0]?.scene ?? "interior").background);
+    this.showMenu();
     this.fit();
     requestAnimationFrame(this.frame);
+  }
+
+  private buildMenu(): void {
+    for (const [index, chapter] of chapters.entries()) {
+      const button = document.createElement("button");
+      button.type = "button";
+      const title = document.createElement("span");
+      title.textContent = `${index + 1}  ${chapter.title}`;
+      const summary = document.createElement("span");
+      summary.className = "chapter-summary";
+      summary.textContent = chapter.summary;
+      button.append(title, summary);
+      button.addEventListener("click", () => {
+        void this.beginChapter(chapter);
+      });
+      this.ui.chapters.append(button);
+    }
+    this.ui.continueChapter.addEventListener("click", () => this.resume());
+    this.ui.toMenu.addEventListener("click", () => {
+      if (!this.onMenu) this.showMenu();
+    });
   }
 
   private buildVerbs(): void {
@@ -152,10 +184,22 @@ export class Game {
     window.addEventListener("keydown", (event) => {
       if (event.repeat) return;
       if (event.key === "d" || event.key === "D") {
+        if (this.onMenu) return;
         this.debug = !this.debug;
         this.message = this.debug ? "Hotspots shown. Clicks log their coordinates." : this.scene.intro;
+        this.pinMessage = true;
+        this.paintSentence();
       }
-      if (event.key === "Escape") this.closeLetter();
+      if (event.key === "Escape") {
+        if (this.shading) return;
+        if (this.letterOpen) this.closeLetter();
+        else if (!this.onMenu) this.showMenu();
+        return;
+      }
+      if (this.onMenu && /^[1-9]$/.test(event.key)) {
+        const chapter = chapters[Number(event.key) - 1];
+        if (chapter) void this.beginChapter(chapter);
+      }
     });
     window.addEventListener("resize", () => this.fit());
   }
@@ -180,8 +224,8 @@ export class Game {
       ctx.fillStyle = "#6a8f4e";
       ctx.fillRect(0, this.scene.walk.yMin, VIEW_W, VIEW_H - this.scene.walk.yMin);
     }
-    this.player.draw(ctx);
-    if (this.debug) this.drawDebug(ctx);
+    if (!this.onMenu) this.player.draw(ctx);
+    if (this.debug && !this.onMenu) this.drawDebug(ctx);
     if (this.shade > 0) {
       ctx.fillStyle = `rgba(12, 8, 4, ${this.shade})`;
       ctx.fillRect(0, 0, VIEW_W, VIEW_H);
@@ -324,6 +368,53 @@ export class Game {
     this.say("Märmu folds the letter and keeps it.");
   }
 
+  private showMenu(): void {
+    if (!this.onMenu) this.savedMessage = this.message;
+    this.onMenu = true;
+    this.letterOpen = false;
+    this.ui.letterLayer.hidden = true;
+    this.armed = null;
+    this.hover = null;
+    this.hoverText = "";
+    this.paintVerbs();
+    this.ui.continueChapter.hidden = this.chapter === null;
+    if (this.chapter) this.ui.continueChapter.textContent = `Continue  ${this.chapter.title}`;
+    this.ui.menu.hidden = false;
+    this.say("Choose a chapter.");
+  }
+
+  private resume(): void {
+    if (!this.chapter || this.startingChapter) return;
+    this.onMenu = false;
+    this.ui.menu.hidden = true;
+    this.message = this.savedMessage;
+    this.pinMessage = true;
+    this.paintSentence();
+  }
+
+  private async beginChapter(chapter: Chapter): Promise<void> {
+    if (this.startingChapter) return;
+    this.startingChapter = true;
+    this.chapter = chapter;
+    this.onMenu = false;
+    this.ui.menu.hidden = true;
+    this.letterOpen = false;
+    this.ui.letterLayer.hidden = true;
+    this.hasLetter = chapter.hasLetter ?? false;
+    this.ui.letterItem.hidden = !this.hasLetter;
+    this.visited.clear();
+    this.armed = null;
+    this.hover = null;
+    this.hoverText = "";
+    this.shading = null;
+    this.shade = 0;
+    this.pending = null;
+    this.player.stop();
+    this.paintVerbs();
+    await this.enter(getScene(chapter.scene), true);
+    this.startingChapter = false;
+  }
+
   private transition(id: string): void {
     if (this.shading) return;
     this.shading = "out";
@@ -439,7 +530,7 @@ export class Game {
   }
 
   private blocked(): boolean {
-    return this.letterOpen || this.shading !== null;
+    return this.onMenu || this.letterOpen || this.shading !== null;
   }
 
   private eventPoint(event: MouseEvent): { x: number; y: number } {

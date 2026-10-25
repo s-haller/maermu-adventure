@@ -69,7 +69,9 @@ canvas {
 
 #verbs button,
 #inventory button,
-#letter-close {
+#letter-close,
+#continue-chapter,
+#chapters button {
   border: 3px solid #2a1a10;
   background: #5a381c;
   color: #f6e7c8;
@@ -86,7 +88,9 @@ canvas {
 
 #verbs button:hover,
 #inventory button:hover,
-#letter-close:hover {
+#letter-close:hover,
+#continue-chapter:hover,
+#chapters button:hover {
   background: #8a5424;
 }
 
@@ -96,11 +100,75 @@ canvas {
 }
 
 #inventory {
+  display: flex;
+  align-items: flex-start;
   margin-top: 6px;
   min-height: 44px;
   border: 3px solid #2a1a10;
   background: #100a06;
   padding: 4px;
+}
+
+#to-menu {
+  margin-left: auto;
+}
+
+#menu {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(12, 8, 4, 0.72);
+}
+
+#menu[hidden],
+#continue-chapter[hidden] {
+  display: none;
+}
+
+#menu-panel {
+  width: 440px;
+  padding: 16px;
+  background: #24160e;
+  border: 4px solid #3a2416;
+  box-shadow: 6px 6px 0 #140c08;
+}
+
+#menu-panel h1 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+#menu-lead {
+  margin: 0 0 12px;
+}
+
+#chapters {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#continue-chapter,
+#chapters button {
+  display: block;
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 8px;
+  text-align: left;
+  line-height: 1.6;
+}
+
+#chapters button {
+  margin-bottom: 0;
+}
+
+.chapter-summary {
+  display: block;
+  margin-top: 6px;
+  color: #f0d7a8;
 }
 
 #letter-item[hidden] {

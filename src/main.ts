@@ -19,6 +19,10 @@ const game = new Game({
   letterHeading: required("#letter-heading"),
   letterBody: required("#letter-body"),
   letterClose: required("#letter-close"),
+  menu: required("#menu"),
+  chapters: required("#chapters"),
+  continueChapter: required("#continue-chapter"),
+  toMenu: required("#to-menu"),
 });
 
 void game.start();
