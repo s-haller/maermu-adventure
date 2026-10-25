@@ -1,0 +1,23 @@
+{
+  "still": {
+    "south": "/art/maermu/south.png",
+    "north": "/art/maermu/north.png",
+    "east": "/art/maermu/east.png",
+    "west": "/art/maermu/west.png"
+  },
+  "walkEast": [
+    "/art/maermu/walk/0.png",
+    "/art/maermu/walk/1.png",
+    "/art/maermu/walk/2.png",
+    "/art/maermu/walk/3.png",
+    "/art/maermu/walk/4.png",
+    "/art/maermu/walk/5.png"
+  ],
+  "idleSouth": [
+    "/art/maermu/idle/0.png",
+    "/art/maermu/idle/1.png",
+    "/art/maermu/idle/2.png",
+    "/art/maermu/idle/3.png"
+  ],
+  "footPad": 15
+}

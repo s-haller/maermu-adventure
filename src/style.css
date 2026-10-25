@@ -1,0 +1,162 @@
+:root {
+  color: #f3e2c4;
+  background: #140c08;
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  line-height: 1.6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: #140c08;
+}
+
+button,
+p,
+h1 {
+  font: inherit;
+  color: inherit;
+}
+
+#layout {
+  margin: 12px auto;
+  overflow: hidden;
+}
+
+#game {
+  width: 640px;
+  transform-origin: top left;
+  background: #1c120c;
+  border: 4px solid #3a2416;
+  padding: 8px;
+}
+
+#stage {
+  position: relative;
+  width: 640px;
+  height: 360px;
+  background: #24160e;
+}
+
+canvas {
+  display: block;
+  width: 640px;
+  height: 360px;
+  image-rendering: pixelated;
+  cursor: crosshair;
+  background: #6ea0c8;
+}
+
+#sentence {
+  min-height: 16px;
+  margin: 8px 0;
+  color: #f6e7c8;
+}
+
+#verbs {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+
+#verbs button,
+#inventory button,
+#letter-close {
+  border: 3px solid #2a1a10;
+  background: #5a381c;
+  color: #f6e7c8;
+  padding: 6px 4px;
+  cursor: pointer;
+  image-rendering: pixelated;
+}
+
+#verbs button.armed,
+#verbs button.preview {
+  background: #c9842a;
+  color: #2a1608;
+}
+
+#verbs button:hover,
+#inventory button:hover,
+#letter-close:hover {
+  background: #8a5424;
+}
+
+#verbs button.armed:hover,
+#verbs button.preview:hover {
+  background: #e0a040;
+}
+
+#inventory {
+  margin-top: 6px;
+  min-height: 44px;
+  border: 3px solid #2a1a10;
+  background: #100a06;
+  padding: 4px;
+}
+
+#letter-item[hidden] {
+  display: none;
+}
+
+#letter-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 72px;
+  background: #3a2414;
+}
+
+#letter-item img {
+  width: 32px;
+  height: 32px;
+  image-rendering: pixelated;
+  object-fit: contain;
+}
+
+#letter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(12, 8, 4, 0.62);
+}
+
+#letter[hidden] {
+  display: none;
+}
+
+#paper {
+  width: 470px;
+  margin: 0;
+  padding: 14px 16px 12px;
+  background: #f3e2c0;
+  color: #2a1c10;
+  border: 4px solid #2a1a10;
+  box-shadow: 6px 6px 0 #140c08;
+}
+
+#paper h1 {
+  margin: 0 0 10px;
+  font-size: 8px;
+}
+
+#letter-body p {
+  margin: 0 0 10px;
+  color: #2a1c10;
+}
+
+#letter-close {
+  display: block;
+  margin-left: auto;
+  background: #5a381c;
+  color: #f6e7c8;
+}

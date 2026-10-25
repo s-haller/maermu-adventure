@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Märmu</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="layout">
+      <div id="game">
+        <div id="stage">
+          <canvas id="scene" width="640" height="360"></canvas>
+          <div id="letter" hidden>
+            <article id="paper">
+              <h1 id="letter-heading"></h1>
+              <div id="letter-body"></div>
+              <button id="letter-close" type="button">Close</button>
+            </article>
+          </div>
+        </div>
+        <p id="sentence"></p>
+        <div id="verbs"></div>
+        <div id="inventory">
+          <button id="letter-item" type="button" hidden>
+            <img id="letter-icon" alt="" width="32" height="32" />
+            <span>letter</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
