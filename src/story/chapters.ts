@@ -1,5 +1,3 @@
-import { finaleItemIds } from "./items";
-
 export type Chapter = {
   id: string;
   title: string;
@@ -10,22 +8,51 @@ export type Chapter = {
   hasLetter?: boolean;
   /** Items already in inventory when this chapter starts. */
   items?: string[];
+  /** Flags already set when this chapter starts. */
+  flags?: string[];
 };
 
 /** Add a chapter here to put it on the main menu. `scene` is where it starts. */
 export const chapters: Chapter[] = [
   {
-    id: "opening",
-    title: "Morning at home",
-    summary: "The cabin, the meadow, and the letter.",
+    id: "letter",
+    title: "The Letter",
+    summary: "A mailbox, a list, and the path to the village.",
     scene: "interior",
   },
   {
+    id: "village",
+    title: "The Village",
+    summary: "Cheese, a notebook, a key, and the last gondola.",
+    scene: "village",
+    hasLetter: true,
+    flags: ["letter-read"],
+  },
+  {
+    id: "mountain",
+    title: "The Mountain",
+    summary: "A slipped trail, a rope, and an eagle.",
+    scene: "trail",
+    hasLetter: true,
+    items: ["rope", "notebook", "sluice-key", "rod", "cheese", "tire"],
+    flags: ["letter-read", "notebook-read"],
+  },
+  {
+    id: "hut",
+    title: "The Hütte",
+    summary: "A tire, a stream, and a cave behind the water.",
+    scene: "hut",
+    hasLetter: true,
+    items: ["sluice-key", "rod", "cheese", "tire"],
+    flags: ["letter-read", "notebook-read", "notebook-gone", "ibex-met"],
+  },
+  {
     id: "bunker",
-    number: 10,
     title: "The Bunker",
-    summary: "Phonemos, Herr Wolke, and a winter's sleep.",
-    scene: "canteen",
-    items: finaleItemIds,
+    summary: "Bruno, a slipped hose, and a word that is spoken.",
+    scene: "entrance",
+    hasLetter: true,
+    items: ["sluice-key", "rod", "cheese"],
+    flags: ["letter-read", "notebook-read", "notebook-gone", "launched"],
   },
 ];

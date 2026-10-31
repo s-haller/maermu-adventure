@@ -34,6 +34,8 @@ export type Hotspot = {
   items?: Partial<Record<string, Action>>;
   /** Hide this hotspot until the flag is set. */
   when?: string;
+  /** Hide this hotspot once the flag is set. */
+  unless?: string;
 };
 
 export type WalkBand = {

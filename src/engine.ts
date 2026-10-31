@@ -1,6 +1,6 @@
 import { loadImage, loadSprites } from "./assets";
 import { chapters, type Chapter } from "./story/chapters";
-import { endings, notebookPages, runScript } from "./story/finale";
+import { endings, notebookPages, runScript } from "./story/play";
 import { carriedItem } from "./story/items";
 import { letter } from "./story/letter";
 import { Player } from "./player";
@@ -69,6 +69,8 @@ export class Game {
   private startingChapter = false;
   private chapter: Chapter | null = null;
   private savedMessage = "";
+  private idle = 0;
+  private yawned = false;
   private last = performance.now();
   private ghost = document.createElement("div");
 
@@ -191,7 +193,14 @@ export class Game {
     const dt = Math.min(0.05, (now - this.last) / 1000);
     this.last = now;
     this.updateFade(dt);
-    if (!this.blocked()) this.player.update(dt);
+    if (!this.blocked()) {
+      this.player.update(dt);
+      this.idle = this.player.isWalking() ? 0 : this.idle + dt;
+      if (this.idle > 36 && !this.yawned) {
+        this.yawned = true;
+        this.say("Märmu yawns. The snow is coming, and so is a nap. Not yet.");
+      }
+    }
     this.draw();
     requestAnimationFrame(this.frame);
   };
@@ -325,9 +334,10 @@ export class Game {
     }
     if (mode === "notebook") {
       this.flags.add("notebook-read");
-      this.say("Märmu closes the notebook. Stone, then snow, then home. The word is WISSEN.");
+      this.say("Märmu closes the notebook. The recipe was a gift. There is no map. He will remember.");
       return;
     }
+    this.flags.add("letter-read");
     this.say("Märmu folds the letter and keeps it.");
   }
 
@@ -354,12 +364,31 @@ export class Game {
   }
 
   private run(id: string): void {
-    const result = runScript(id, { flags: this.flags, switches: this.switches });
+    const result = runScript(id, {
+      flags: this.flags,
+      switches: this.switches,
+      items: this.inventory,
+      hasLetter: this.hasLetter,
+    });
     if (result.switches) this.switches = result.switches;
     for (const flag of result.set ?? []) this.flags.add(flag);
+    for (const item of result.remove ?? []) this.lose(item);
+    for (const item of result.add ?? []) this.gain(item);
     this.say(result.say);
+    if (result.read === "notebook") this.showReader("notebook");
     if (result.ending) this.showReader("ending", result.ending);
     if (result.go) this.transition(result.go);
+  }
+
+  private gain(id: string): void {
+    if (this.inventory.includes(id)) return;
+    this.inventory.push(id);
+    this.syncPack();
+  }
+
+  private lose(id: string): void {
+    this.inventory = this.inventory.filter((item) => item !== id);
+    this.syncPack();
   }
 
   private bindItem(button: HTMLElement, id: string): void {
@@ -599,6 +628,7 @@ export class Game {
     this.inventory = chapter.items ? [...chapter.items] : [];
     this.cancelDrag();
     this.flags.clear();
+    for (const flag of chapter.flags ?? []) this.flags.add(flag);
     this.switches = [];
     this.syncPack();
     this.visited.clear();
@@ -633,15 +663,18 @@ export class Game {
     this.background = await this.backgroundFor(scene);
     const seen = this.visited.has(scene.id);
     this.visited.add(scene.id);
+    this.idle = 0;
+    this.yawned = false;
     if (!seen || first) this.say(scene.intro);
     else this.say(scene.returnLine);
   }
 
   private async backgroundFor(scene: Scene): Promise<CanvasImageSource | null> {
-    const cached = this.backgrounds.get(scene.id);
+    const src = scene.background;
+    const cached = this.backgrounds.get(src);
     if (cached) return cached;
-    const image = await loadImage(scene.background);
-    if (image) this.backgrounds.set(scene.id, image);
+    const image = await loadImage(src);
+    if (image) this.backgrounds.set(src, image);
     return image;
   }
 
@@ -672,6 +705,7 @@ export class Game {
       const hotspot = spots[i];
       if (!hotspot) continue;
       if (hotspot.when && !this.flags.has(hotspot.when)) continue;
+      if (hotspot.unless && this.flags.has(hotspot.unless)) continue;
       const rect = hotspot.rect;
       if (x >= rect.x && y >= rect.y && x < rect.x + rect.w && y < rect.y + rect.h) return hotspot;
     }

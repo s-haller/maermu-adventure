@@ -1,4 +1,4 @@
-import { finaleScenes } from "./story/finale";
+import { placeScenes } from "./story/places";
 import type { Scene } from "./types";
 
 const scenery = {
@@ -10,7 +10,7 @@ const scenery = {
 };
 
 export const scenes: Record<string, Scene> = {
-  ...finaleScenes,
+  ...placeScenes,
   interior: {
     id: "interior",
     background: "/art/interior.png",
@@ -223,6 +223,17 @@ export const scenes: Record<string, Scene> = {
           pickup: { type: "say", text: "The post is planted in the meadow. The Swiss post would mind." },
           give: { type: "say", text: "The mailbox already has a job. It does not want a gift." },
           talk: { type: "say", text: "The mailbox has nothing to say. The letter might." },
+        },
+      },
+      {
+        id: "village-path",
+        name: "path",
+        rect: { x: 8, y: 300, w: 110, h: 60 },
+        defaultVerb: "walk",
+        approach: { x: 80, y: 336, facing: "west" },
+        verbs: {
+          walk: { type: "script", id: "to-village" },
+          look: { type: "say", text: "The path down to the village. The letter says what to carry." },
         },
       },
     ],

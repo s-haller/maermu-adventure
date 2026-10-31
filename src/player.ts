@@ -42,6 +42,10 @@ export class Player {
     }
   }
 
+  isWalking(): boolean {
+    return this.moving;
+  }
+
   stop(): void {
     this.target = null;
     this.onArrive = null;

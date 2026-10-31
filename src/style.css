@@ -54,10 +54,11 @@ canvas {
 }
 
 #sentence {
-  height: calc(1.6em * 2);
+  min-height: calc(1.6em * 2);
+  max-height: calc(1.6em * 4);
   margin: 8px 0;
   line-height: 1.6;
-  overflow: hidden;
+  overflow: auto;
   color: #f6e7c8;
 }
 
