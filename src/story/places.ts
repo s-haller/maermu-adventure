@@ -175,10 +175,10 @@ export const placeScenes: Record<string, Scene> = {
     entry: { x: 70, y: 300, facing: "east" },
     opening: { x: 60, y: 300, facing: "east" },
     hotspots: [
-      spot("bridge", "bridge", { x: 220, y: 80, w: 200, h: 80 }, undefined, "look", {
+      spot("bridge", "bridge", { x: 300, y: 192, w: 162, h: 52 }, undefined, "look", {
         look: script("bridge"),
       }),
-      spot("stone", "stone", { x: 130, y: 210, w: 110, h: 90 }, { x: 120, y: 300, facing: "east" }, "use", {
+      spot("stone", "stone", { x: 110, y: 319, w: 53, h: 29 }, { x: 100, y: 330, facing: "east" }, "use", {
         use: script("stone"),
         look: say("A stone at the break. It did not come up from the village. The gorge did the rest."),
       }, { rope: script("stone-throw") }),
@@ -193,15 +193,15 @@ export const placeScenes: Record<string, Scene> = {
     walk: { xMin: 16, xMax: 240, yMin: 200, yMax: 270 },
     entry: { x: 80, y: 240, facing: "east" },
     hotspots: [
-      spot("crow", "crow", { x: 8, y: 160, w: 70, h: 80 }, { x: 60, y: 240, facing: "west" }, "talk", {
+      spot("crow", "crow", { x: 0, y: 251, w: 64, h: 53 }, { x: 52, y: 270, facing: "west" }, "talk", {
         talk: script("crow"),
         look: say("The crow. He joined at the gondola and has not paused for breath."),
       }),
-      spot("ibex", "ibex", { x: 60, y: 100, w: 150, h: 150 }, { x: 120, y: 240, facing: "west" }, "talk", {
+      spot("ibex", "ibex", { x: 55, y: 205, w: 95, h: 89 }, { x: 115, y: 270, facing: "west" }, "talk", {
         talk: script("ibex"),
         look: say("An old ibex. Long horns, longer patience."),
       }),
-      spot("onward", "trail", { x: 180, y: 140, w: 90, h: 110 }, { x: 190, y: 240, facing: "east" }, "walk", {
+      spot("onward", "trail", { x: 122, y: 262, w: 52, h: 27 }, { x: 132, y: 270, facing: "east" }, "walk", {
         walk: script("hut-path"),
         look: say("The trail the ibex meant. It does not look empty."),
       }),
@@ -217,17 +217,17 @@ export const placeScenes: Record<string, Scene> = {
     entry: { x: 160, y: 300, facing: "east" },
     opening: { x: 140, y: 300, facing: "east" },
     hotspots: [
-      spot("axe", "chopping block", { x: 16, y: 130, w: 130, h: 120 }, { x: 100, y: 300, facing: "west" }, "look", {
+      spot("axe", "chopping block", { x: 46, y: 177, w: 54, h: 47 }, { x: 100, y: 299, facing: "west" }, "look", {
         look: script("axe"),
       }),
-      spot("animals", "animals", { x: 180, y: 140, w: 220, h: 110 }, { x: 260, y: 300, facing: "north" }, "look", {
+      spot("animals", "animals", { x: 222, y: 182, w: 237, h: 113 }, { x: 302, y: 330, facing: "north" }, "look", {
         look: script("animals"),
       }),
-      spot("fence", "fence", { x: 460, y: 150, w: 160, h: 110 }, { x: 420, y: 300, facing: "east" }, "use", {
+      spot("fence", "fence", { x: 464, y: 195, w: 160, h: 110 }, { x: 424, y: 330, facing: "east" }, "use", {
         use: script("catapult"),
         look: say("A fence, the corner of the hut, and no wood for a bridge. The ibex is watching the gap."),
       }, { tire: script("catapult-do") }),
-      spot("cave", "cave", { x: 400, y: 30, w: 200, h: 140 }, { x: 420, y: 300, facing: "east" }, "open", {
+      spot("cave", "cave", { x: 455, y: 30, w: 144, h: 115 }, { x: 419, y: 300, facing: "east" }, "open", {
         open: script("cave"),
         look: say("A waterfall, and a cave behind it. The stream is the part in the way."),
       }),
@@ -243,11 +243,11 @@ export const placeScenes: Record<string, Scene> = {
     entry: { x: 140, y: 310, facing: "east" },
     opening: { x: 120, y: 310, facing: "east" },
     hotspots: [
-      spot("door", "steel door", { x: 200, y: 70, w: 240, h: 190 }, { x: 300, y: 310, facing: "north" }, "open", {
+      spot("door", "steel door", { x: 309, y: 80, w: 156, h: 232 }, { x: 409, y: 320, facing: "north" }, "open", {
         open: script("enter-bunker"),
         look: script("motto"),
       }),
-      spot("motto", "lintel", { x: 200, y: 8, w: 240, h: 70 }, { x: 300, y: 310, facing: "north" }, "look", {
+      spot("motto", "lintel", { x: 360, y: 0, w: 88, h: 41 }, { x: 391, y: 299, facing: "north" }, "look", {
         look: script("motto"),
       }),
     ],
@@ -362,15 +362,15 @@ export const placeScenes: Record<string, Scene> = {
         use: script("terminal"),
         look: say("A single terminal. The motto opens a door. The word that matters is spoken, and not yet."),
       }),
-      spot("far-door", "far door", { x: 500, y: 70, w: 130, h: 200 }, { x: 470, y: 306, facing: "east" }, "open", {
+      spot("far-door", "far door", { x: 493, y: 113, w: 89, h: 164 }, { x: 463, y: 313, facing: "east" }, "open", {
         open: script("cool-door"),
         look: say("A heavier door. The air that leaks past it is cold."),
       }),
       spot(
         "stairs",
         "stairs",
-        { x: 180, y: 280, w: 160, h: 70 },
-        { x: 240, y: 306, facing: "south" },
+        { x: 110, y: 306, w: 94, h: 52 },
+        { x: 163, y: 314, facing: "south" },
         "walk",
         {
           walk: script("to-plant"),
@@ -418,11 +418,11 @@ export const placeScenes: Record<string, Scene> = {
     walk: floor,
     entry: { x: 120, y: 310, facing: "east" },
     hotspots: [
-      spot("out", "door", { x: 8, y: 80, w: 140, h: 180 }, { x: 140, y: 310, facing: "west" }, "open", {
+      spot("out", "door", { x: 30, y: 145, w: 98, h: 129 }, { x: 139, y: 310, facing: "west" }, "open", {
         open: script("back-terminal"),
         look: say("Back to the terminal."),
       }),
-      spot("beans", "coffee", { x: 280, y: 70, w: 220, h: 180 }, { x: 300, y: 310, facing: "north" }, "pickup", {
+      spot("beans", "coffee", { x: 397, y: 136, w: 82, h: 148 }, { x: 300, y: 310, facing: "north" }, "pickup", {
         pickup: script("beans"),
         look: say("Sacks, frost, and a tin of coffee beans."),
       }),
@@ -437,15 +437,15 @@ export const placeScenes: Record<string, Scene> = {
     walk: { xMin: 24, xMax: 480, yMin: 268, yMax: 326 },
     entry: { x: 80, y: 306, facing: "east" },
     hotspots: [
-      spot("back", "stairs", { x: 0, y: 60, w: 80, h: 220 }, { x: 100, y: 306, facing: "west" }, "walk", {
+      spot("back", "stairs", { x: 0, y: 106, w: 80, h: 220 }, { x: 100, y: 326, facing: "west" }, "walk", {
         walk: script("plant-back"),
         look: say("Back up to the terminal."),
       }),
       spot(
         "wolke",
         "Herr Wolke",
-        { x: 230, y: 70, w: 160, h: 200 },
-        { x: 300, y: 310, facing: "north" },
+        { x: 306, y: 210, w: 42, h: 115 },
+        { x: 300, y: 309, facing: "north" },
         "talk",
         {
           talk: script("plant-wolke"),
@@ -457,14 +457,14 @@ export const placeScenes: Record<string, Scene> = {
           "sluice-key": script("plant-key"),
         },
       ),
-      spot("gate", "turbine gate", { x: 190, y: 16, w: 240, h: 70 }, { x: 300, y: 310, facing: "north" }, "look", {
+      spot("gate", "turbine gate", { x: 273, y: 100, w: 130, h: 198 }, { x: 383, y: 326, facing: "north" }, "look", {
         look: say("The sluice gate. Behind it, the current that keeps Phonemos alive."),
       }),
       spot(
         "falke",
         "Falke",
-        { x: 180, y: 90, w: 140, h: 180 },
-        { x: 200, y: 306, facing: "east" },
+        { x: 448, y: 83, w: 140, h: 180 },
+        { x: 468, y: 299, facing: "east" },
         "talk",
         {
           talk: script("plant-falke"),

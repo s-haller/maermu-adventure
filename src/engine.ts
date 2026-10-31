@@ -5,7 +5,7 @@ import { carriedItem } from "./story/items";
 import { letter } from "./story/letter";
 import { Player } from "./player";
 import { getScene } from "./scenes";
-import type { Action, Hotspot, Rect, Scene, Verb } from "./types";
+import type { Action, FrameImage, Hotspot, Rect, Scene, Verb } from "./types";
 import { commandLine, DEFAULT_QUIPS } from "./verbs";
 
 const VIEW_W = 640;
@@ -58,6 +58,7 @@ export class Game {
   private player: Player;
   private scene: Scene = getScene("interior");
   private background: CanvasImageSource | null = null;
+  private wolkeImage: FrameImage | null = null;
   private backgrounds = new Map<string, CanvasImageSource>();
   private hover: Hotspot | null = null;
   private hoverText = "";
@@ -118,6 +119,7 @@ export class Game {
     const { sprites, footPad } = await loadSprites();
     this.player = new Player(sprites);
     this.player.footPad = footPad;
+    this.wolkeImage = await loadImage("/art/wolke/south.png");
     this.ui.letterIcon.src = "/art/letter.png";
     this.buildMenu();
     this.background = await loadImage(getScene(chapters[0]?.scene ?? "interior").background);
@@ -270,13 +272,54 @@ export class Game {
       ctx.fillStyle = "#6a8f4e";
       ctx.fillRect(0, this.scene.walk.yMin, VIEW_W, VIEW_H - this.scene.walk.yMin);
     }
-    if (!this.onMenu) this.player.draw(ctx);
+    if (!this.onMenu) this.drawCast(ctx);
     if (this.design && !this.onMenu) this.drawDesign(ctx);
     else if (this.debug && !this.onMenu) this.drawDebug(ctx);
     if (this.shade > 0) {
       ctx.fillStyle = `rgba(12, 8, 4, ${this.shade})`;
       ctx.fillRect(0, 0, VIEW_W, VIEW_H);
     }
+  }
+
+  private drawCast(ctx: CanvasRenderingContext2D): void {
+    const figures: { y: number; draw: () => void }[] = [
+      { y: this.player.y, draw: () => this.player.draw(ctx) },
+    ];
+    const wolke = this.wolkeSpot();
+    if (wolke && this.wolkeImage) {
+      const place = this.wolkePlace(wolke);
+      figures.push({ y: place.y, draw: () => this.drawWolke(ctx, place.x, place.y) });
+    }
+    figures.sort((a, b) => a.y - b.y);
+    for (const figure of figures) figure.draw();
+  }
+
+  private wolkeSpot(): Hotspot | null {
+    if (this.scene.id === "power" || this.scene.id === "canteen2") return null;
+    const spots = this.scene.hotspots;
+    for (let i = spots.length - 1; i >= 0; i -= 1) {
+      const hotspot = spots[i];
+      if (hotspot?.id === "wolke" && !this.hotspotHidden(hotspot)) return hotspot;
+    }
+    return null;
+  }
+
+  private wolkePlace(hotspot: Hotspot): { x: number; y: number } {
+    return {
+      x: hotspot.rect.x + hotspot.rect.w / 2,
+      y: hotspot.rect.y + hotspot.rect.h,
+    };
+  }
+
+  private drawWolke(ctx: CanvasRenderingContext2D, x: number, y: number): void {
+    const image = this.wolkeImage;
+    if (!image) return;
+    const depth = depthScale(y, this.scene.walk);
+    const bob = Math.round(Math.sin(performance.now() / 420) * depth);
+    const w = image.width * depth;
+    const h = image.height * depth;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(image, Math.round(x - w / 2), Math.round(y - h + bob), Math.round(w), Math.round(h));
   }
 
   private drawDebug(ctx: CanvasRenderingContext2D): void {
@@ -1030,6 +1073,12 @@ export class Game {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
+}
+
+function depthScale(y: number, band: { yMin: number; yMax: number }): number {
+  const span = band.yMax - band.yMin || 1;
+  const t = clamp((y - band.yMin) / span, 0, 1);
+  return 0.82 + t * 0.28;
 }
 
 function handlePoint(rect: Rect, handle: (typeof HANDLES)[number]): { x: number; y: number } {
