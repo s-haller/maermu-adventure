@@ -20,6 +20,7 @@ export type Action =
   | { type: "open-mailbox" }
   | { type: "close-mailbox" }
   | { type: "read-letter" }
+  | { type: "script"; id: string }
   | { type: "sequence"; steps: Action[] };
 
 export type Hotspot = {
@@ -29,6 +30,10 @@ export type Hotspot = {
   defaultVerb: Verb;
   approach?: { x: number; y: number; facing?: Direction };
   verbs: Partial<Record<Verb, Action>>;
+  /** What happens when a carried item is used on this hotspot. */
+  items?: Partial<Record<string, Action>>;
+  /** Hide this hotspot until the flag is set. */
+  when?: string;
 };
 
 export type WalkBand = {

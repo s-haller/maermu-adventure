@@ -1,3 +1,4 @@
+import { finaleScenes } from "./story/finale";
 import type { Scene } from "./types";
 
 const scenery = {
@@ -9,6 +10,7 @@ const scenery = {
 };
 
 export const scenes: Record<string, Scene> = {
+  ...finaleScenes,
   interior: {
     id: "interior",
     background: "/art/interior.png",

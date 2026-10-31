@@ -1,5 +1,7 @@
 import { loadImage, loadSprites } from "./assets";
 import { chapters, type Chapter } from "./story/chapters";
+import { endings, notebookPages, runScript } from "./story/finale";
+import { carriedItem } from "./story/items";
 import { letter } from "./story/letter";
 import { Player } from "./player";
 import { getScene } from "./scenes";
@@ -15,6 +17,7 @@ export type GameUi = {
   canvas: HTMLCanvasElement;
   sentence: HTMLElement;
   verbs: HTMLElement;
+  pack: HTMLElement;
   letterItem: HTMLButtonElement;
   letterIcon: HTMLImageElement;
   letterLayer: HTMLElement;
@@ -44,6 +47,11 @@ export class Game {
   private pointerX = 0;
   private pointerY = 0;
   private hasLetter = false;
+  private inventory: string[] = [];
+  private selected: string | null = null;
+  private flags = new Set<string>();
+  private switches: string[] = [];
+  private reader: "letter" | "notebook" | "ending" | null = null;
   private visited = new Set<string>();
   private debug = false;
   private shade = 0;
@@ -70,7 +78,6 @@ export class Game {
 
   async start(): Promise<void> {
     this.buildVerbs();
-    this.fillLetter();
     this.bind();
     const { sprites, footPad } = await loadSprites();
     this.player = new Player(sprites);
@@ -88,7 +95,8 @@ export class Game {
       const button = document.createElement("button");
       button.type = "button";
       const title = document.createElement("span");
-      title.textContent = `${index + 1}  ${chapter.title}`;
+      const number = chapter.number ?? index + 1;
+      title.textContent = `${number}  ${chapter.title}`;
       const summary = document.createElement("span");
       summary.className = "chapter-summary";
       summary.textContent = chapter.summary;
@@ -112,15 +120,6 @@ export class Game {
       button.addEventListener("click", () => this.arm(verb.id));
       this.ui.verbs.append(button);
       this.verbButtons.set(verb.id, button);
-    }
-  }
-
-  private fillLetter(): void {
-    this.ui.letterHeading.textContent = letter.heading;
-    for (const paragraph of letter.paragraphs) {
-      const p = document.createElement("p");
-      p.textContent = paragraph;
-      this.ui.letterBody.append(p);
     }
   }
 
@@ -196,8 +195,9 @@ export class Game {
         else if (!this.onMenu) this.showMenu();
         return;
       }
-      if (this.onMenu && /^[1-9]$/.test(event.key)) {
-        const chapter = chapters[Number(event.key) - 1];
+      if (this.onMenu && /^[0-9]$/.test(event.key)) {
+        const number = event.key === "0" ? 10 : Number(event.key);
+        const chapter = chapters.find((entry, index) => (entry.number ?? index + 1) === number);
         if (chapter) void this.beginChapter(chapter);
       }
     });
@@ -251,6 +251,11 @@ export class Game {
     const verb = this.armed;
     this.armed = null;
     this.paintVerbs();
+    if (this.selected && (!verb || verb === "use" || verb === "give")) {
+      if (hotspot) this.useSelected(hotspot);
+      else this.say(`Use the ${this.selectedName()} on something.`);
+      return;
+    }
     if (verb && verb !== "walk") {
       if (hotspot) this.perform(hotspot, verb);
       else this.say(this.groundRefusal(verb));
@@ -313,6 +318,9 @@ export class Game {
       case "read-letter":
         this.openLetter();
         break;
+      case "script":
+        this.run(action.id);
+        break;
       case "sequence":
         for (const step of action.steps) this.apply(step);
         break;
@@ -353,19 +361,156 @@ export class Game {
   }
 
   private openLetter(): void {
-    this.letterOpen = true;
-    this.hover = null;
-    this.hoverText = "";
-    this.ui.letterLayer.hidden = false;
-    this.paintVerbs();
+    this.showReader("letter");
     this.say("Märmu reads the letter.");
   }
 
   private closeLetter(): void {
     if (!this.letterOpen) return;
+    const mode = this.reader;
     this.letterOpen = false;
+    this.reader = null;
     this.ui.letterLayer.hidden = true;
+    this.ui.letterClose.textContent = "Close";
+    if (mode === "ending") {
+      this.showMenu();
+      return;
+    }
+    if (mode === "notebook") {
+      this.flags.add("notebook-read");
+      this.say("Märmu closes the notebook. Stone, then snow, then home. The word is WISSEN.");
+      return;
+    }
     this.say("Märmu folds the letter and keeps it.");
+  }
+
+  private showReader(mode: "letter" | "notebook" | "ending", ending?: keyof typeof endings): void {
+    const doc =
+      mode === "notebook"
+        ? { heading: "Bruno's notebook", paragraphs: notebookPages }
+        : mode === "ending" && ending
+          ? endings[ending]
+          : letter;
+    this.reader = mode;
+    this.letterOpen = true;
+    this.hover = null;
+    this.hoverText = "";
+    this.ui.letterHeading.textContent = doc.heading;
+    this.ui.letterBody.replaceChildren();
+    for (const paragraph of doc.paragraphs) {
+      const p = document.createElement("p");
+      p.textContent = paragraph;
+      this.ui.letterBody.append(p);
+    }
+    this.ui.letterClose.textContent = mode === "ending" ? "Menu" : "Close";
+    this.ui.letterLayer.hidden = false;
+    this.paintVerbs();
+  }
+
+  private run(id: string): void {
+    const result = runScript(id, { flags: this.flags, switches: this.switches });
+    if (result.switches) this.switches = result.switches;
+    for (const flag of result.set ?? []) this.flags.add(flag);
+    this.say(result.say);
+    if (result.ending) this.showReader("ending", result.ending);
+    if (result.go) this.transition(result.go);
+  }
+
+  private useSelected(hotspot: Hotspot): void {
+    const id = this.selected;
+    if (!id) return;
+    const name = this.selectedName();
+    const action = hotspot.items?.[id];
+    this.selected = null;
+    this.syncPack();
+    if (!action) {
+      this.say(`The ${name} does nothing to the ${hotspot.name}.`);
+      return;
+    }
+    this.message = `Use ${name} on ${hotspot.name}`;
+    this.paintSentence();
+    const approach = hotspot.approach;
+    const run = () => {
+      if (approach?.facing) this.player.facing = approach.facing;
+      this.apply(action);
+    };
+    if (approach) this.player.walkTo(approach.x, approach.y, run);
+    else run();
+  }
+
+  private clickItem(id: string): void {
+    if (this.blocked()) return;
+    const item = carriedItem(id);
+    if (!item) return;
+    const verb = this.armed;
+    this.armed = null;
+    this.paintVerbs();
+    if (verb === "look") {
+      this.lookItem(id);
+      return;
+    }
+    if (this.selected === id) {
+      this.selected = null;
+      this.syncPack();
+      this.say(`${item.name} put away.`);
+      return;
+    }
+    this.selected = id;
+    this.syncPack();
+    if (id === "notebook") {
+      this.showReader("notebook");
+      this.say("Märmu opens the notebook.");
+      return;
+    }
+    this.say(`Use ${item.name} on…`);
+  }
+
+  private lookItem(id: string): void {
+    if (this.letterOpen || this.shading) return;
+    const item = carriedItem(id);
+    if (!item) return;
+    if (id === "notebook") {
+      this.selected = id;
+      this.syncPack();
+      this.showReader("notebook");
+      this.say("Märmu opens the notebook.");
+      return;
+    }
+    this.say(item.look);
+  }
+
+  private selectedName(): string {
+    return carriedItem(this.selected ?? "")?.name ?? "thing";
+  }
+
+  private syncPack(): void {
+    this.ui.pack.replaceChildren();
+    for (const id of this.inventory) {
+      const item = carriedItem(id);
+      if (!item) continue;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "pack-item";
+      button.textContent = item.name;
+      button.classList.toggle("selected", id === this.selected);
+      button.addEventListener("click", () => this.clickItem(id));
+      button.addEventListener("contextmenu", (event) => {
+        event.preventDefault();
+        this.lookItem(id);
+      });
+      button.addEventListener("mouseenter", () => {
+        this.hoverText =
+          this.selected === id ? `Use ${item.name} on…` : commandLine(this.armed ?? "look", item.name);
+        this.paintSentence();
+        this.paintVerbs();
+      });
+      button.addEventListener("mouseleave", () => {
+        this.hoverText = "";
+        this.paintSentence();
+        this.paintVerbs();
+      });
+      this.ui.pack.append(button);
+    }
   }
 
   private showMenu(): void {
@@ -399,9 +544,16 @@ export class Game {
     this.onMenu = false;
     this.ui.menu.hidden = true;
     this.letterOpen = false;
+    this.reader = null;
     this.ui.letterLayer.hidden = true;
+    this.ui.letterClose.textContent = "Close";
     this.hasLetter = chapter.hasLetter ?? false;
     this.ui.letterItem.hidden = !this.hasLetter;
+    this.inventory = chapter.items ? [...chapter.items] : [];
+    this.selected = null;
+    this.flags.clear();
+    this.switches = [];
+    this.syncPack();
     this.visited.clear();
     this.armed = null;
     this.hover = null;
@@ -475,6 +627,9 @@ export class Game {
 
   private previewLine(x: number, y: number): string {
     const hotspot = this.hotspotAt(x, y);
+    if (this.selected && (!this.armed || this.armed === "use" || this.armed === "give")) {
+      return hotspot ? `Use ${this.selectedName()} on ${hotspot.name}` : `Use ${this.selectedName()} on…`;
+    }
     if (hotspot) return commandLine(this.armed ?? hotspot.defaultVerb, hotspot.name);
     if (this.armed && this.armed !== "walk") return `${commandLine(this.armed, "").trim()}…`;
     return "Walk to";
@@ -482,7 +637,7 @@ export class Game {
 
   private groundRefusal(verb: Verb): string {
     if (verb === "look") return this.scene.groundLook;
-    return `${this.scene.id === "interior" ? "The floor" : "The path"} has no use for that.`;
+    return `${this.scene.id === "exterior" ? "The path" : "The floor"} has no use for that.`;
   }
 
   private hotspotAt(x: number, y: number): Hotspot | null {
@@ -490,6 +645,7 @@ export class Game {
     for (let i = spots.length - 1; i >= 0; i -= 1) {
       const hotspot = spots[i];
       if (!hotspot) continue;
+      if (hotspot.when && !this.flags.has(hotspot.when)) continue;
       const rect = hotspot.rect;
       if (x >= rect.x && y >= rect.y && x < rect.x + rect.w && y < rect.y + rect.h) return hotspot;
     }

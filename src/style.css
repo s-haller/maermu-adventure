@@ -103,10 +103,30 @@ canvas {
   display: flex;
   align-items: flex-start;
   margin-top: 6px;
-  min-height: 44px;
+  height: 92px;
   border: 3px solid #2a1a10;
   background: #100a06;
   padding: 4px;
+}
+
+#pack {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pack-item {
+  width: auto;
+  padding: 4px 6px;
+}
+
+#inventory button.selected,
+#inventory button.selected:hover {
+  background: #e0a040;
+  color: #2a1608;
 }
 
 #to-menu {

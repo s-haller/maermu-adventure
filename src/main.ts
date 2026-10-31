@@ -13,6 +13,7 @@ const game = new Game({
   canvas: required("#scene"),
   sentence: required("#sentence"),
   verbs: required("#verbs"),
+  pack: required("#pack"),
   letterItem: required("#letter-item"),
   letterIcon: required("#letter-icon"),
   letterLayer: required("#letter"),
