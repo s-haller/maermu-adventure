@@ -61,13 +61,6 @@ canvas {
   color: #f6e7c8;
 }
 
-#verbs {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 4px;
-}
-
-#verbs button,
 #inventory button,
 #letter-close,
 #continue-chapter,
@@ -78,25 +71,14 @@ canvas {
   padding: 6px 4px;
   cursor: pointer;
   image-rendering: pixelated;
+  touch-action: none;
 }
 
-#verbs button.armed,
-#verbs button.preview {
-  background: #c9842a;
-  color: #2a1608;
-}
-
-#verbs button:hover,
 #inventory button:hover,
 #letter-close:hover,
 #continue-chapter:hover,
 #chapters button:hover {
   background: #8a5424;
-}
-
-#verbs button.armed:hover,
-#verbs button.preview:hover {
-  background: #e0a040;
 }
 
 #inventory {
@@ -121,12 +103,6 @@ canvas {
 .pack-item {
   width: auto;
   padding: 4px 6px;
-}
-
-#inventory button.selected,
-#inventory button.selected:hover {
-  background: #e0a040;
-  color: #2a1608;
 }
 
 #to-menu {
@@ -249,4 +225,26 @@ canvas {
   margin-left: auto;
   background: #5a381c;
   color: #f6e7c8;
+}
+
+#drag-ghost {
+  position: fixed;
+  z-index: 30;
+  pointer-events: none;
+  transform: translate(14px, 16px);
+  padding: 6px 8px;
+  border: 3px solid #2a1a10;
+  background: #e0a040;
+  color: #2a1608;
+  white-space: nowrap;
+}
+
+#drag-ghost[hidden] {
+  display: none;
+}
+
+body.dragging,
+body.dragging * {
+  cursor: grabbing !important;
+  user-select: none;
 }

@@ -10,7 +10,7 @@ export const VERBS: { id: Verb; label: string }[] = [
   { id: "use", label: "Use" },
   { id: "give", label: "Give" },
   { id: "talk", label: "Talk to" },
-  { id: "look", label: "Look at" },
+  { id: "look", label: "Examine" },
 ];
 
 export const VERB_LABEL: Record<Verb, string> = Object.fromEntries(

@@ -6,17 +6,25 @@ import { letter } from "./story/letter";
 import { Player } from "./player";
 import { getScene } from "./scenes";
 import type { Action, Hotspot, Scene, Verb } from "./types";
-import { commandLine, DEFAULT_QUIPS, VERBS } from "./verbs";
+import { commandLine, DEFAULT_QUIPS } from "./verbs";
 
 const VIEW_W = 640;
 const VIEW_H = 360;
+const DRAG_SLOP = 6;
+
+type ItemDrag = {
+  id: string;
+  pointerId: number;
+  startX: number;
+  startY: number;
+  active: boolean;
+};
 
 export type GameUi = {
   game: HTMLElement;
   layout: HTMLElement;
   canvas: HTMLCanvasElement;
   sentence: HTMLElement;
-  verbs: HTMLElement;
   pack: HTMLElement;
   letterItem: HTMLButtonElement;
   letterIcon: HTMLImageElement;
@@ -36,7 +44,6 @@ export class Game {
   private scene: Scene = getScene("interior");
   private background: CanvasImageSource | null = null;
   private backgrounds = new Map<string, CanvasImageSource>();
-  private armed: Verb | null = null;
   private hover: Hotspot | null = null;
   private hoverText = "";
   private message = "";
@@ -48,7 +55,7 @@ export class Game {
   private pointerY = 0;
   private hasLetter = false;
   private inventory: string[] = [];
-  private selected: string | null = null;
+  private drag: ItemDrag | null = null;
   private flags = new Set<string>();
   private switches: string[] = [];
   private reader: "letter" | "notebook" | "ending" | null = null;
@@ -63,12 +70,15 @@ export class Game {
   private chapter: Chapter | null = null;
   private savedMessage = "";
   private last = performance.now();
-  private verbButtons = new Map<Verb, HTMLButtonElement>();
+  private ghost = document.createElement("div");
 
   constructor(private ui: GameUi) {
     const ctx = ui.canvas.getContext("2d");
     if (!ctx) throw new Error("Canvas is unavailable");
     this.ctx = ctx;
+    this.ghost.id = "drag-ghost";
+    this.ghost.hidden = true;
+    document.body.append(this.ghost);
     this.player = new Player({
       still: { south: null, north: null, east: null, west: null },
       walkEast: [],
@@ -77,7 +87,6 @@ export class Game {
   }
 
   async start(): Promise<void> {
-    this.buildVerbs();
     this.bind();
     const { sprites, footPad } = await loadSprites();
     this.player = new Player(sprites);
@@ -112,17 +121,6 @@ export class Game {
     });
   }
 
-  private buildVerbs(): void {
-    for (const verb of VERBS) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.textContent = verb.label;
-      button.addEventListener("click", () => this.arm(verb.id));
-      this.ui.verbs.append(button);
-      this.verbButtons.set(verb.id, button);
-    }
-  }
-
   private bind(): void {
     const canvas = this.ui.canvas;
     canvas.addEventListener("mousemove", (event) => {
@@ -138,15 +136,14 @@ export class Game {
       this.hoverText = this.previewLine(point.x, point.y);
       canvas.style.cursor = this.hover ? "pointer" : "crosshair";
       this.paintSentence();
-      this.paintVerbs();
     });
     canvas.addEventListener("mouseleave", () => {
+      if (this.drag?.active) return;
       this.hover = null;
       this.hoverText = "";
       this.paintSentence();
-      this.paintVerbs();
     });
-    canvas.addEventListener("contextmenu", (event) => event.preventDefault());
+    this.ui.game.addEventListener("contextmenu", (event) => event.preventDefault());
     canvas.addEventListener("pointerdown", (event) => {
       if (this.blocked()) return;
       const point = this.eventPoint(event);
@@ -160,22 +157,7 @@ export class Game {
       if (event.button !== 0) return;
       this.primary(point.x, point.y);
     });
-    this.ui.letterItem.addEventListener("click", () => this.useLetter(this.armed ?? "look"));
-    this.ui.letterItem.addEventListener("contextmenu", (event) => {
-      event.preventDefault();
-      this.useLetter("look");
-    });
-    this.ui.letterItem.addEventListener("mouseenter", () => {
-      const verb = this.armed ?? "look";
-      this.hoverText = commandLine(verb, "letter");
-      this.paintSentence();
-      this.paintVerbs();
-    });
-    this.ui.letterItem.addEventListener("mouseleave", () => {
-      this.hoverText = "";
-      this.paintSentence();
-      this.paintVerbs();
-    });
+    this.bindItem(this.ui.letterItem, "letter");
     this.ui.letterClose.addEventListener("click", () => this.closeLetter());
     this.ui.letterLayer.addEventListener("pointerdown", (event) => {
       if (event.target === this.ui.letterLayer) this.closeLetter();
@@ -191,6 +173,7 @@ export class Game {
       }
       if (event.key === "Escape") {
         if (this.shading) return;
+        this.cancelDrag();
         if (this.letterOpen) this.closeLetter();
         else if (!this.onMenu) this.showMenu();
         return;
@@ -248,26 +231,11 @@ export class Game {
 
   private primary(x: number, y: number): void {
     const hotspot = this.hotspotAt(x, y);
-    const verb = this.armed;
-    this.armed = null;
-    this.paintVerbs();
-    if (this.selected && (!verb || verb === "use" || verb === "give")) {
-      if (hotspot) this.useSelected(hotspot);
-      else this.say(`Use the ${this.selectedName()} on something.`);
-      return;
-    }
-    if (verb && verb !== "walk") {
-      if (hotspot) this.perform(hotspot, verb);
-      else this.say(this.groundRefusal(verb));
-      return;
-    }
     if (hotspot) this.perform(hotspot, hotspot.defaultVerb);
     else this.walk(x, y);
   }
 
   private lookAt(x: number, y: number): void {
-    this.armed = null;
-    this.paintVerbs();
     const hotspot = this.hotspotAt(x, y);
     if (hotspot) this.perform(hotspot, "look");
     else this.say(this.scene.groundLook);
@@ -339,27 +307,6 @@ export class Game {
     this.say("A letter is waiting inside. Märmu takes it.");
   }
 
-  private useLetter(verb: Verb): void {
-    if (this.letterOpen || this.shading) return;
-    this.armed = null;
-    this.paintVerbs();
-    this.message = commandLine(verb, "letter");
-    if (verb === "look" || verb === "use" || verb === "open") {
-      this.openLetter();
-      return;
-    }
-    const lines: Partial<Record<Verb, string>> = {
-      walk: "He is already carrying the letter.",
-      close: "It is a letter, not a door. He can fold it after reading.",
-      push: "Crumpling the post would be rude, even for a marmot in a hurry.",
-      pull: "Pulling a letter does not reveal a second letter.",
-      pickup: "He is already holding it.",
-      give: "There is nobody here who wants his mail.",
-      talk: "He can read it. It will not read itself aloud.",
-    };
-    this.say(lines[verb] ?? DEFAULT_QUIPS[verb]);
-  }
-
   private openLetter(): void {
     this.showReader("letter");
     this.say("Märmu reads the letter.");
@@ -404,7 +351,6 @@ export class Game {
     }
     this.ui.letterClose.textContent = mode === "ending" ? "Menu" : "Close";
     this.ui.letterLayer.hidden = false;
-    this.paintVerbs();
   }
 
   private run(id: string): void {
@@ -416,13 +362,131 @@ export class Game {
     if (result.go) this.transition(result.go);
   }
 
-  private useSelected(hotspot: Hotspot): void {
-    const id = this.selected;
-    if (!id) return;
-    const name = this.selectedName();
+  private bindItem(button: HTMLElement, id: string): void {
+    button.dataset.item = id;
+    button.addEventListener("pointerdown", (event) => this.beginDrag(event, id));
+    button.addEventListener("pointermove", (event) => this.moveDrag(event));
+    button.addEventListener("pointerup", (event) => this.endDrag(event));
+    button.addEventListener("pointercancel", () => this.cancelDrag());
+    button.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
+      this.examineItem(id);
+    });
+    button.addEventListener("mouseenter", () => {
+      if (this.drag?.active || this.blocked()) return;
+      this.pinMessage = false;
+      this.hoverText = this.itemHover(id);
+      this.paintSentence();
+    });
+    button.addEventListener("mouseleave", () => {
+      if (this.drag?.active) return;
+      this.hoverText = "";
+      this.paintSentence();
+    });
+  }
+
+  private beginDrag(event: PointerEvent, id: string): void {
+    if (event.button !== 0 || this.blocked()) return;
+    event.preventDefault();
+    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+    this.drag = {
+      id,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      active: false,
+    };
+  }
+
+  private moveDrag(event: PointerEvent): void {
+    const drag = this.drag;
+    if (!drag || event.pointerId !== drag.pointerId) return;
+    if (!drag.active) {
+      if (Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < DRAG_SLOP) return;
+      drag.active = true;
+      this.pinMessage = false;
+      document.body.classList.add("dragging");
+    }
+    this.ghost.hidden = false;
+    this.ghost.textContent = this.itemName(drag.id);
+    this.ghost.style.left = `${event.clientX}px`;
+    this.ghost.style.top = `${event.clientY}px`;
+    this.hoverText = this.dragLine(drag.id, event.clientX, event.clientY);
+    this.paintSentence();
+  }
+
+  private endDrag(event: PointerEvent): void {
+    const drag = this.drag;
+    if (!drag || event.pointerId !== drag.pointerId) return;
+    const active = drag.active;
+    const id = drag.id;
+    this.cancelDrag();
+    if (!active) {
+      this.activateItem(id);
+      return;
+    }
+    this.dropItem(id, event.clientX, event.clientY);
+  }
+
+  private cancelDrag(): void {
+    const wasDragging = this.drag?.active ?? false;
+    this.drag = null;
+    this.ghost.hidden = true;
+    document.body.classList.remove("dragging");
+    if (!wasDragging) return;
+    this.hoverText = "";
+    this.paintSentence();
+  }
+
+  private activateItem(id: string): void {
+    if (this.blocked()) return;
+    if (id === "letter") {
+      this.openLetter();
+      return;
+    }
+    if (id === "notebook") {
+      this.showReader("notebook");
+      this.say("Märmu opens the notebook.");
+      return;
+    }
+    const item = carriedItem(id);
+    if (!item) return;
+    this.say(`Drag the ${item.name} onto something.`);
+  }
+
+  private examineItem(id: string): void {
+    if (this.blocked()) return;
+    this.cancelDrag();
+    if (id === "letter") {
+      this.say("A folded letter. The handwriting is Uncle Bruno's.");
+      return;
+    }
+    const item = carriedItem(id);
+    if (item) this.say(item.look);
+  }
+
+  private dropItem(id: string, clientX: number, clientY: number): void {
+    const name = this.itemName(id);
+    const hotspot = this.hotspotAtClient(clientX, clientY);
+    if (hotspot) {
+      this.useOnHotspot(id, hotspot);
+      return;
+    }
+    const other = this.itemAt(clientX, clientY);
+    if (other && other !== id) {
+      this.say(`The ${name} does nothing to the ${this.itemName(other)}.`);
+      return;
+    }
+    if (this.overScene(clientX, clientY)) this.say(`The ${name} does nothing there.`);
+  }
+
+  private useOnHotspot(id: string, hotspot: Hotspot): void {
+    const name = this.itemName(id);
+    if (id === "letter") {
+      this.say(`The letter does nothing to the ${hotspot.name}.`);
+      return;
+    }
     const action = hotspot.items?.[id];
-    this.selected = null;
-    this.syncPack();
     if (!action) {
       this.say(`The ${name} does nothing to the ${hotspot.name}.`);
       return;
@@ -438,49 +502,49 @@ export class Game {
     else run();
   }
 
-  private clickItem(id: string): void {
-    if (this.blocked()) return;
-    const item = carriedItem(id);
-    if (!item) return;
-    const verb = this.armed;
-    this.armed = null;
-    this.paintVerbs();
-    if (verb === "look") {
-      this.lookItem(id);
-      return;
-    }
-    if (this.selected === id) {
-      this.selected = null;
-      this.syncPack();
-      this.say(`${item.name} put away.`);
-      return;
-    }
-    this.selected = id;
-    this.syncPack();
-    if (id === "notebook") {
-      this.showReader("notebook");
-      this.say("Märmu opens the notebook.");
-      return;
-    }
-    this.say(`Use ${item.name} on…`);
+  private itemHover(id: string): string {
+    if (id === "letter" || id === "notebook") return `Read ${this.itemName(id)}`;
+    return commandLine("use", this.itemName(id));
   }
 
-  private lookItem(id: string): void {
-    if (this.letterOpen || this.shading) return;
-    const item = carriedItem(id);
-    if (!item) return;
-    if (id === "notebook") {
-      this.selected = id;
-      this.syncPack();
-      this.showReader("notebook");
-      this.say("Märmu opens the notebook.");
-      return;
-    }
-    this.say(item.look);
+  private dragLine(id: string, clientX: number, clientY: number): string {
+    const name = this.itemName(id);
+    const hotspot = this.hotspotAtClient(clientX, clientY);
+    if (hotspot) return `Use ${name} on ${hotspot.name}`;
+    const other = this.itemAt(clientX, clientY);
+    if (other && other !== id) return `Use ${name} on ${this.itemName(other)}`;
+    return `Use ${name} on…`;
   }
 
-  private selectedName(): string {
-    return carriedItem(this.selected ?? "")?.name ?? "thing";
+  private itemName(id: string): string {
+    if (id === "letter") return "letter";
+    return carriedItem(id)?.name ?? "thing";
+  }
+
+  private itemAt(clientX: number, clientY: number): string | null {
+    const under = document.elementFromPoint(clientX, clientY);
+    const el = under?.closest<HTMLElement>("[data-item]");
+    return el?.dataset.item ?? null;
+  }
+
+  private hotspotAtClient(clientX: number, clientY: number): Hotspot | null {
+    const point = this.scenePoint(clientX, clientY);
+    if (!point) return null;
+    return this.hotspotAt(point.x, point.y);
+  }
+
+  private overScene(clientX: number, clientY: number): boolean {
+    return this.scenePoint(clientX, clientY) !== null;
+  }
+
+  private scenePoint(clientX: number, clientY: number): { x: number; y: number } | null {
+    const rect = this.ui.canvas.getBoundingClientRect();
+    if (clientX < rect.left || clientY < rect.top || clientX > rect.right || clientY > rect.bottom) return null;
+    if (document.elementFromPoint(clientX, clientY) !== this.ui.canvas) return null;
+    return {
+      x: ((clientX - rect.left) / rect.width) * VIEW_W,
+      y: ((clientY - rect.top) / rect.height) * VIEW_H,
+    };
   }
 
   private syncPack(): void {
@@ -492,23 +556,7 @@ export class Game {
       button.type = "button";
       button.className = "pack-item";
       button.textContent = item.name;
-      button.classList.toggle("selected", id === this.selected);
-      button.addEventListener("click", () => this.clickItem(id));
-      button.addEventListener("contextmenu", (event) => {
-        event.preventDefault();
-        this.lookItem(id);
-      });
-      button.addEventListener("mouseenter", () => {
-        this.hoverText =
-          this.selected === id ? `Use ${item.name} on…` : commandLine(this.armed ?? "look", item.name);
-        this.paintSentence();
-        this.paintVerbs();
-      });
-      button.addEventListener("mouseleave", () => {
-        this.hoverText = "";
-        this.paintSentence();
-        this.paintVerbs();
-      });
+      this.bindItem(button, id);
       this.ui.pack.append(button);
     }
   }
@@ -516,12 +564,11 @@ export class Game {
   private showMenu(): void {
     if (!this.onMenu) this.savedMessage = this.message;
     this.onMenu = true;
+    this.cancelDrag();
     this.letterOpen = false;
     this.ui.letterLayer.hidden = true;
-    this.armed = null;
     this.hover = null;
     this.hoverText = "";
-    this.paintVerbs();
     this.ui.continueChapter.hidden = this.chapter === null;
     if (this.chapter) this.ui.continueChapter.textContent = `Continue  ${this.chapter.title}`;
     this.ui.menu.hidden = false;
@@ -550,19 +597,17 @@ export class Game {
     this.hasLetter = chapter.hasLetter ?? false;
     this.ui.letterItem.hidden = !this.hasLetter;
     this.inventory = chapter.items ? [...chapter.items] : [];
-    this.selected = null;
+    this.cancelDrag();
     this.flags.clear();
     this.switches = [];
     this.syncPack();
     this.visited.clear();
-    this.armed = null;
     this.hover = null;
     this.hoverText = "";
     this.shading = null;
     this.shade = 0;
     this.pending = null;
     this.player.stop();
-    this.paintVerbs();
     await this.enter(getScene(chapter.scene), true);
     this.startingChapter = false;
   }
@@ -615,29 +660,10 @@ export class Game {
     }
   }
 
-  private arm(verb: Verb): void {
-    if (this.blocked()) return;
-    this.armed = this.armed === verb ? null : verb;
-    this.hover = null;
-    this.hoverText = "";
-    this.pinMessage = false;
-    this.paintVerbs();
-    this.paintSentence();
-  }
-
   private previewLine(x: number, y: number): string {
     const hotspot = this.hotspotAt(x, y);
-    if (this.selected && (!this.armed || this.armed === "use" || this.armed === "give")) {
-      return hotspot ? `Use ${this.selectedName()} on ${hotspot.name}` : `Use ${this.selectedName()} on…`;
-    }
-    if (hotspot) return commandLine(this.armed ?? hotspot.defaultVerb, hotspot.name);
-    if (this.armed && this.armed !== "walk") return `${commandLine(this.armed, "").trim()}…`;
+    if (hotspot) return commandLine(hotspot.defaultVerb, hotspot.name);
     return "Walk to";
-  }
-
-  private groundRefusal(verb: Verb): string {
-    if (verb === "look") return this.scene.groundLook;
-    return `${this.scene.id === "exterior" ? "The path" : "The floor"} has no use for that.`;
   }
 
   private hotspotAt(x: number, y: number): Hotspot | null {
@@ -662,6 +688,10 @@ export class Game {
   }
 
   private paintSentence(): void {
+    if (this.drag?.active && this.hoverText) {
+      this.ui.sentence.textContent = this.hoverText;
+      return;
+    }
     if (this.pinMessage) {
       this.ui.sentence.textContent = this.message;
       return;
@@ -670,19 +700,7 @@ export class Game {
       this.ui.sentence.textContent = this.hoverText;
       return;
     }
-    if (this.armed && !this.hoverText) {
-      this.ui.sentence.textContent = `${VERBS.find((verb) => verb.id === this.armed)?.label ?? ""}…`;
-      return;
-    }
     this.ui.sentence.textContent = this.message;
-  }
-
-  private paintVerbs(): void {
-    const preview = this.hover?.defaultVerb;
-    for (const [verb, button] of this.verbButtons) {
-      button.classList.toggle("armed", verb === this.armed);
-      button.classList.toggle("preview", this.armed === null && verb === preview);
-    }
   }
 
   private blocked(): boolean {

@@ -12,7 +12,6 @@ const game = new Game({
   layout: required("#layout"),
   canvas: required("#scene"),
   sentence: required("#sentence"),
-  verbs: required("#verbs"),
   pack: required("#pack"),
   letterItem: required("#letter-item"),
   letterIcon: required("#letter-icon"),
