@@ -396,7 +396,7 @@ export const placeScenes: Record<string, Scene> = {
       spot(
         "falke",
         "Falke",
-        { x: 160, y: 120, w: 110, h: 170 },
+        { x: 160, y: 207, w: 72, h: 83 },
         { x: 200, y: 306, facing: "west" },
         "talk",
         {
