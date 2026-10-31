@@ -28,35 +28,35 @@ export const placeScenes: Record<string, Scene> = {
     entry: { x: 160, y: 300, facing: "east" },
     opening: { x: 180, y: 300, facing: "east" },
     hotspots: [
-      spot("up-path", "path home", { x: 0, y: 230, w: 70, h: 120 }, { x: 100, y: 300, facing: "west" }, "walk", {
+      spot("up-path", "path home", { x: 138, y: 319, w: 447, h: 36 }, { x: 238, y: 305, facing: "west" }, "walk", {
         walk: script("to-meadow"),
         look: say("The path back up to the cabin."),
       }),
-      spot("dairy-door", "dairy", { x: 8, y: 40, w: 130, h: 150 }, { x: 90, y: 290, facing: "north" }, "open", {
+      spot("dairy-door", "dairy", { x: 215, y: 196, w: 24, h: 70 }, { x: 297, y: 330, facing: "north" }, "open", {
         open: script("to-dairy"),
         look: say("A shopfront on the lane. The dairy, and the cheese Märmu made."),
       }),
-      spot("bike", "biker", { x: 70, y: 200, w: 100, h: 80 }, { x: 140, y: 300, facing: "north" }, "talk", {
+      spot("bike", "biker", { x: 119, y: 245, w: 53, h: 52 }, { x: 160, y: 327, facing: "north" }, "talk", {
         talk: script("biker"),
         look: say("A mountain bike against the fence, and a rider who will not give anything away."),
       }),
-      spot("elder-door", "elder's cottage", { x: 140, y: 50, w: 130, h: 140 }, { x: 200, y: 290, facing: "north" }, "open", {
+      spot("elder-door", "elder's cottage", { x: 262, y: 210, w: 17, h: 40 }, { x: 322, y: 330, facing: "north" }, "open", {
         open: script("to-elder"),
         look: say("The elder's cottage. Old songs, and a notebook that is not a map."),
       }),
-      spot("station-path", "road", { x: 250, y: 210, w: 140, h: 100 }, { x: 320, y: 300, facing: "north" }, "walk", {
+      spot("station-path", "road", { x: 304, y: 222, w: 63, h: 23 }, { x: 320, y: 300, facing: "north" }, "walk", {
         walk: script("to-station"),
         look: say("The road down to the valley station. The gondola is the last car."),
       }),
-      spot("workshop-door", "workshop", { x: 450, y: 40, w: 170, h: 160 }, { x: 500, y: 290, facing: "north" }, "open", {
+      spot("workshop-door", "workshop", { x: 458, y: 207, w: 23, h: 65 }, { x: 508, y: 330, facing: "north" }, "open", {
         open: script("to-workshop"),
         look: say("The workshop. The letter asked for one key. The shelf has a double."),
       }),
       spot(
         "wolke",
         "Herr Wolke",
-        { x: 300, y: 180, w: 80, h: 110 },
-        { x: 320, y: 300, facing: "north" },
+        { x: 370, y: 227, w: 80, h: 110 },
+        { x: 390, y: 330, facing: "north" },
         "talk",
         {
           talk: script("wolke-lane"),
@@ -117,7 +117,7 @@ export const placeScenes: Record<string, Scene> = {
         walk: script("leave-shop"),
         look: say("The way back to the lane."),
       }),
-      spot("elder", "elder", { x: 70, y: 80, w: 220, h: 190 }, { x: 200, y: 310, facing: "west" }, "talk", {
+      spot("elder", "elder", { x: 186, y: 118, w: 160, h: 171 }, { x: 316, y: 329, facing: "west" }, "talk", {
         talk: script("elder"),
         look: say("The elder, keeper of old songs, and of a notebook with no map in it."),
       }),

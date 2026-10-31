@@ -77,7 +77,7 @@ export const scenes: Record<string, Scene> = {
       {
         id: "left-bench",
         name: "bench",
-        rect: { x: 96, y: 176, w: 120, h: 42 },
+        rect: { x: 98, y: 177, w: 120, h: 42 },
         defaultVerb: "look",
         verbs: {
           look: { type: "say", text: "A plain bench under the window. Fine for sitting. Terrible for news." },

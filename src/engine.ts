@@ -5,7 +5,7 @@ import { carriedItem } from "./story/items";
 import { letter } from "./story/letter";
 import { Player } from "./player";
 import { getScene } from "./scenes";
-import type { Action, Hotspot, Scene, Verb } from "./types";
+import type { Action, Hotspot, Rect, Scene, Verb } from "./types";
 import { commandLine, DEFAULT_QUIPS } from "./verbs";
 
 const VIEW_W = 640;
@@ -18,6 +18,21 @@ type ItemDrag = {
   startX: number;
   startY: number;
   active: boolean;
+};
+
+const HANDLES = ["nw", "n", "ne", "e", "se", "s", "sw", "w"] as const;
+type DesignHandle = (typeof HANDLES)[number] | "move";
+
+const HANDLE_CURSORS: Record<DesignHandle, string> = {
+  n: "ns-resize",
+  s: "ns-resize",
+  e: "ew-resize",
+  w: "ew-resize",
+  nw: "nwse-resize",
+  se: "nwse-resize",
+  ne: "nesw-resize",
+  sw: "nesw-resize",
+  move: "move",
 };
 
 export type GameUi = {
@@ -61,6 +76,16 @@ export class Game {
   private reader: "letter" | "notebook" | "ending" | null = null;
   private visited = new Set<string>();
   private debug = false;
+  private design = false;
+  private selectedId: string | null = null;
+  private designDrag: {
+    id: string;
+    handle: DesignHandle;
+    startX: number;
+    startY: number;
+    rect: Rect;
+    approach: { x: number; y: number } | null;
+  } | null = null;
   private shade = 0;
   private shading: "out" | "in" | "hold" | null = null;
   private pending: (() => void) | null = null;
@@ -134,13 +159,17 @@ export class Game {
         const aged = performance.now() - this.pinAt > 700;
         if (moved && aged) this.pinMessage = false;
       }
+      if (this.design) {
+        this.onDesignMove(point.x, point.y);
+        return;
+      }
       this.hover = this.hotspotAt(point.x, point.y);
       this.hoverText = this.previewLine(point.x, point.y);
       canvas.style.cursor = this.hover ? "pointer" : "crosshair";
       this.paintSentence();
     });
     canvas.addEventListener("mouseleave", () => {
-      if (this.drag?.active) return;
+      if (this.drag?.active || this.design) return;
       this.hover = null;
       this.hoverText = "";
       this.paintSentence();
@@ -149,6 +178,10 @@ export class Game {
     canvas.addEventListener("pointerdown", (event) => {
       if (this.blocked()) return;
       const point = this.eventPoint(event);
+      if (this.design) {
+        if (event.button === 0) this.onDesignDown(point.x, point.y);
+        return;
+      }
       if (this.debug) {
         console.log(`${this.scene.id} ${Math.round(point.x)}, ${Math.round(point.y)}`);
       }
@@ -164,10 +197,27 @@ export class Game {
     this.ui.letterLayer.addEventListener("pointerdown", (event) => {
       if (event.target === this.ui.letterLayer) this.closeLetter();
     });
+    window.addEventListener("pointerup", () => {
+      this.designDrag = null;
+    });
     window.addEventListener("keydown", (event) => {
+      if (this.design && !this.onMenu && event.key.startsWith("Arrow")) {
+        event.preventDefault();
+        this.nudgeSelected(event.key, event.shiftKey ? 8 : 1);
+        return;
+      }
       if (event.repeat) return;
+      if ((event.key === "e" || event.key === "E") && !event.metaKey && !event.ctrlKey) {
+        this.toggleDesign();
+        return;
+      }
+      if ((event.key === "s" || event.key === "S") && this.design && !this.onMenu) {
+        event.preventDefault();
+        void this.saveDesign();
+        return;
+      }
       if (event.key === "d" || event.key === "D") {
-        if (this.onMenu) return;
+        if (this.onMenu || this.design) return;
         this.debug = !this.debug;
         this.message = this.debug ? "Hotspots shown. Clicks log their coordinates." : this.scene.intro;
         this.pinMessage = true;
@@ -176,6 +226,10 @@ export class Game {
       if (event.key === "Escape") {
         if (this.shading) return;
         this.cancelDrag();
+        if (this.design) {
+          this.leaveDesign();
+          return;
+        }
         if (this.letterOpen) this.closeLetter();
         else if (!this.onMenu) this.showMenu();
         return;
@@ -217,7 +271,8 @@ export class Game {
       ctx.fillRect(0, this.scene.walk.yMin, VIEW_W, VIEW_H - this.scene.walk.yMin);
     }
     if (!this.onMenu) this.player.draw(ctx);
-    if (this.debug && !this.onMenu) this.drawDebug(ctx);
+    if (this.design && !this.onMenu) this.drawDesign(ctx);
+    else if (this.debug && !this.onMenu) this.drawDebug(ctx);
     if (this.shade > 0) {
       ctx.fillStyle = `rgba(12, 8, 4, ${this.shade})`;
       ctx.fillRect(0, 0, VIEW_W, VIEW_H);
@@ -393,22 +448,26 @@ export class Game {
 
   private bindItem(button: HTMLElement, id: string): void {
     button.dataset.item = id;
-    button.addEventListener("pointerdown", (event) => this.beginDrag(event, id));
+    button.addEventListener("pointerdown", (event) => {
+      if (this.design) return;
+      this.beginDrag(event, id);
+    });
     button.addEventListener("pointermove", (event) => this.moveDrag(event));
     button.addEventListener("pointerup", (event) => this.endDrag(event));
     button.addEventListener("pointercancel", () => this.cancelDrag());
     button.addEventListener("contextmenu", (event) => {
       event.preventDefault();
+      if (this.design) return;
       this.examineItem(id);
     });
     button.addEventListener("mouseenter", () => {
-      if (this.drag?.active || this.blocked()) return;
+      if (this.design || this.drag?.active || this.blocked()) return;
       this.pinMessage = false;
       this.hoverText = this.itemHover(id);
       this.paintSentence();
     });
     button.addEventListener("mouseleave", () => {
-      if (this.drag?.active) return;
+      if (this.design || this.drag?.active) return;
       this.hoverText = "";
       this.paintSentence();
     });
@@ -657,6 +716,8 @@ export class Game {
 
   private async enter(scene: Scene, first: boolean): Promise<void> {
     this.scene = scene;
+    this.selectedId = null;
+    this.designDrag = null;
     this.player.band = scene.walk;
     const spot = first && scene.opening ? scene.opening : scene.entry;
     this.player.place(spot.x, spot.y, spot.facing);
@@ -697,6 +758,206 @@ export class Game {
     const hotspot = this.hotspotAt(x, y);
     if (hotspot) return commandLine(hotspot.defaultVerb, hotspot.name);
     return "Walk to";
+  }
+
+  private toggleDesign(): void {
+    if (this.onMenu || this.letterOpen) return;
+    this.design = !this.design;
+    this.designDrag = null;
+    this.pinMessage = false;
+    if (this.design) {
+      this.hoverText = "Design mode. Drag a box, drag an edge to resize, S saves, Esc leaves.";
+    } else {
+      this.leaveDesign();
+      return;
+    }
+    this.paintSentence();
+  }
+
+  private leaveDesign(): void {
+    this.design = false;
+    this.designDrag = null;
+    this.selectedId = null;
+    this.hoverText = "";
+    this.message = this.scene.intro;
+    this.pinMessage = false;
+    this.ui.canvas.style.cursor = "crosshair";
+    this.paintSentence();
+  }
+
+  private onDesignDown(x: number, y: number): void {
+    const selected = this.selectedHotspot();
+    const handle = selected ? this.handleAt(selected, x, y) : null;
+    const hotspot = handle && selected ? selected : this.designHotspotAt(x, y);
+    if (!hotspot) {
+      this.selectedId = null;
+      this.hoverText = this.designLine(null);
+      this.paintSentence();
+      return;
+    }
+    this.selectedId = hotspot.id;
+    this.designDrag = {
+      id: hotspot.id,
+      handle: handle ?? "move",
+      startX: x,
+      startY: y,
+      rect: { ...hotspot.rect },
+      approach: hotspot.approach ? { x: hotspot.approach.x, y: hotspot.approach.y } : null,
+    };
+    this.pinMessage = false;
+    this.hoverText = this.designLine(hotspot);
+    this.ui.canvas.style.cursor = HANDLE_CURSORS[this.designDrag.handle] ?? "move";
+    this.paintSentence();
+  }
+
+  private onDesignMove(x: number, y: number): void {
+    const drag = this.designDrag;
+    if (drag) {
+      const hotspot = this.scene.hotspots.find((entry) => entry.id === drag.id);
+      if (!hotspot) return;
+      const dx = x - drag.startX;
+      const dy = y - drag.startY;
+      hotspot.rect = resizeRect(drag.rect, drag.handle, dx, dy);
+      if (drag.handle === "move" && drag.approach && hotspot.approach) {
+        const band = this.scene.walk;
+        hotspot.approach.x = clamp(Math.round(drag.approach.x + dx), band.xMin, band.xMax);
+        hotspot.approach.y = clamp(Math.round(drag.approach.y + dy), band.yMin, band.yMax);
+      }
+      this.hoverText = this.designLine(hotspot);
+      this.ui.canvas.style.cursor = HANDLE_CURSORS[drag.handle] ?? "move";
+      this.paintSentence();
+      return;
+    }
+    const selected = this.selectedHotspot();
+    const handle = selected ? this.handleAt(selected, x, y) : null;
+    const hotspot = handle && selected ? selected : this.designHotspotAt(x, y);
+    this.hoverText = this.designLine(hotspot);
+    this.ui.canvas.style.cursor = handle ? HANDLE_CURSORS[handle] : hotspot ? "move" : "crosshair";
+    this.paintSentence();
+  }
+
+  private nudgeSelected(key: string, step: number): void {
+    const hotspot = this.selectedHotspot();
+    if (!hotspot) return;
+    const dx = key === "ArrowLeft" ? -step : key === "ArrowRight" ? step : 0;
+    const dy = key === "ArrowUp" ? -step : key === "ArrowDown" ? step : 0;
+    const next = resizeRect(hotspot.rect, "move", dx, dy);
+    const movedX = next.x - hotspot.rect.x;
+    const movedY = next.y - hotspot.rect.y;
+    hotspot.rect = next;
+    if (hotspot.approach) {
+      const band = this.scene.walk;
+      hotspot.approach.x = clamp(hotspot.approach.x + movedX, band.xMin, band.xMax);
+      hotspot.approach.y = clamp(hotspot.approach.y + movedY, band.yMin, band.yMax);
+    }
+    this.pinMessage = false;
+    this.hoverText = this.designLine(hotspot);
+    this.paintSentence();
+  }
+
+  private async saveDesign(): Promise<void> {
+    const hotspots = this.scene.hotspots.map((hotspot) => ({
+      id: hotspot.id,
+      rect: { ...hotspot.rect },
+      approach: hotspot.approach ? { x: hotspot.approach.x, y: hotspot.approach.y } : undefined,
+    }));
+    try {
+      const response = await fetch("/__design", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scene: this.scene.id, hotspots }),
+      });
+      const data = (await response.json()) as { error?: string; missing?: string[] };
+      if (!response.ok) throw new Error(data.error || "Could not save.");
+      const missing = data.missing?.length ? ` Missing ${data.missing.join(", ")}.` : "";
+      this.say(`Saved ${this.scene.id}.${missing}`);
+    } catch {
+      this.say("Could not save. Design mode writes the source only while npm run dev is running.");
+    }
+  }
+
+  private drawDesign(ctx: CanvasRenderingContext2D): void {
+    ctx.save();
+    ctx.font = "10px monospace";
+    ctx.lineWidth = 1;
+    const band = this.scene.walk;
+    ctx.strokeStyle = "rgba(255, 225, 74, 0.45)";
+    ctx.strokeRect(band.xMin, band.yMin, band.xMax - band.xMin, band.yMax - band.yMin);
+    for (const hotspot of this.scene.hotspots) {
+      if (hotspot.id === this.selectedId) continue;
+      this.strokeHotspot(ctx, hotspot, false);
+    }
+    const selected = this.selectedHotspot();
+    if (selected) this.strokeHotspot(ctx, selected, true);
+    ctx.fillStyle = "#7dffb3";
+    ctx.fillText("DESIGN", 8, 14);
+    ctx.restore();
+  }
+
+  private strokeHotspot(ctx: CanvasRenderingContext2D, hotspot: Hotspot, selected: boolean): void {
+    const hidden = this.hotspotHidden(hotspot);
+    const rect = hotspot.rect;
+    ctx.strokeStyle = selected ? "#7dffb3" : hidden ? "rgba(255, 225, 74, 0.55)" : "#ffe14a";
+    ctx.fillStyle = selected ? "rgba(125, 255, 179, 0.16)" : "rgba(255, 225, 74, 0.08)";
+    ctx.setLineDash(hidden && !selected ? [3, 3] : []);
+    ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+    ctx.strokeRect(rect.x + 0.5, rect.y + 0.5, rect.w, rect.h);
+    ctx.setLineDash([]);
+    const label = hotspot.id;
+    const width = ctx.measureText(label).width + 4;
+    const labelY = rect.y > 16 ? rect.y - 12 : rect.y + 2;
+    ctx.fillStyle = "rgba(12, 8, 4, 0.78)";
+    ctx.fillRect(rect.x, labelY, width, 12);
+    ctx.fillStyle = selected ? "#7dffb3" : "#ffe14a";
+    ctx.fillText(label, rect.x + 2, labelY + 10);
+    if (!selected) return;
+    ctx.fillStyle = "#ffffff";
+    for (const handle of HANDLES) {
+      const point = handlePoint(rect, handle);
+      ctx.fillRect(point.x - 3, point.y - 3, 6, 6);
+    }
+    if (!hotspot.approach) return;
+    ctx.strokeStyle = "#7dffb3";
+    ctx.beginPath();
+    ctx.arc(hotspot.approach.x, hotspot.approach.y, 4, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  private designLine(hotspot: Hotspot | null): string {
+    if (!hotspot) return "Design mode. Drag a box, drag an edge to resize, S saves, Esc leaves.";
+    const rect = hotspot.rect;
+    const hidden = this.hotspotHidden(hotspot) ? " hidden" : "";
+    return `${hotspot.id}${hidden}  ${rect.x}, ${rect.y}  ${rect.w}x${rect.h}    S saves`;
+  }
+
+  private designHotspotAt(x: number, y: number): Hotspot | null {
+    const spots = this.scene.hotspots;
+    for (let i = spots.length - 1; i >= 0; i -= 1) {
+      const hotspot = spots[i];
+      if (!hotspot) continue;
+      const rect = hotspot.rect;
+      if (x >= rect.x && y >= rect.y && x < rect.x + rect.w && y < rect.y + rect.h) return hotspot;
+    }
+    return null;
+  }
+
+  private selectedHotspot(): Hotspot | null {
+    if (!this.selectedId) return null;
+    return this.scene.hotspots.find((hotspot) => hotspot.id === this.selectedId) ?? null;
+  }
+
+  private handleAt(hotspot: Hotspot, x: number, y: number): DesignHandle | null {
+    for (const handle of HANDLES) {
+      const point = handlePoint(hotspot.rect, handle);
+      if (Math.hypot(point.x - x, point.y - y) <= 8) return handle;
+    }
+    return null;
+  }
+
+  private hotspotHidden(hotspot: Hotspot): boolean {
+    if (hotspot.when && !this.flags.has(hotspot.when)) return true;
+    if (hotspot.unless && this.flags.has(hotspot.unless)) return true;
+    return false;
   }
 
   private hotspotAt(x: number, y: number): Hotspot | null {
@@ -769,4 +1030,56 @@ export class Game {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
+}
+
+function handlePoint(rect: Rect, handle: (typeof HANDLES)[number]): { x: number; y: number } {
+  const midX = rect.x + rect.w / 2;
+  const midY = rect.y + rect.h / 2;
+  switch (handle) {
+    case "nw":
+      return { x: rect.x, y: rect.y };
+    case "n":
+      return { x: midX, y: rect.y };
+    case "ne":
+      return { x: rect.x + rect.w, y: rect.y };
+    case "e":
+      return { x: rect.x + rect.w, y: midY };
+    case "se":
+      return { x: rect.x + rect.w, y: rect.y + rect.h };
+    case "s":
+      return { x: midX, y: rect.y + rect.h };
+    case "sw":
+      return { x: rect.x, y: rect.y + rect.h };
+    case "w":
+      return { x: rect.x, y: midY };
+  }
+}
+
+function resizeRect(orig: Rect, handle: DesignHandle, dx: number, dy: number): Rect {
+  if (handle === "move") return clampRect({ x: orig.x + dx, y: orig.y + dy, w: orig.w, h: orig.h });
+  let x = orig.x;
+  let y = orig.y;
+  let right = orig.x + orig.w;
+  let bottom = orig.y + orig.h;
+  if (handle.includes("w")) x += dx;
+  if (handle.includes("e")) right += dx;
+  if (handle.includes("n")) y += dy;
+  if (handle.includes("s")) bottom += dy;
+  if (right - x < 12) {
+    if (handle.includes("w")) x = right - 12;
+    else right = x + 12;
+  }
+  if (bottom - y < 12) {
+    if (handle.includes("n")) y = bottom - 12;
+    else bottom = y + 12;
+  }
+  return clampRect({ x, y, w: right - x, h: bottom - y });
+}
+
+function clampRect(rect: Rect): Rect {
+  const w = Math.max(12, Math.round(rect.w));
+  const h = Math.max(12, Math.round(rect.h));
+  const x = clamp(Math.round(rect.x), 0, VIEW_W - 12);
+  const y = clamp(Math.round(rect.y), 0, VIEW_H - 12);
+  return { x, y, w: Math.min(w, VIEW_W - x), h: Math.min(h, VIEW_H - y) };
 }

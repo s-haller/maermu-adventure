@@ -1,4 +1,4 @@
-# Märmu
+# Märmu and the Quest for the Eternal Knowledge
 
 A point-and-click adventure about a marmot, a letter, and a wiki that lives in the Alps.
 
@@ -21,4 +21,4 @@ The controls follow *Beneath a Steel Sky*. There is no verb menu. The line under
 
 A left click on the letter or the notebook reads it. A right click examines it.
 
-`Esc` opens the chapter menu. `D` draws the hotspot boxes.
+`Esc` opens the chapter menu. `D` draws the hotspot boxes. `E` opens design mode: drag a box to move it, drag an edge or corner to resize it, and use the arrow keys to nudge the selected box. `S` writes that scene's boxes back into the source. `Esc` leaves design mode.
