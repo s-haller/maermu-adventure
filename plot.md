@@ -4,19 +4,19 @@ A puzzle adventure for Phonemos. "Your wiki in the Alps, not in the clouds."
 
 ## Logline
 
-A marmot who has never left his meadow must follow his lost uncle's trail into the Swiss Alps, beat a greedy cloud company to a Cold War bunker holding the world's knowledge, and decide whether wisdom belongs in the clouds or in the mountain.
+A marmot who has never left his meadow follows his uncle's letter into the Swiss Alps, stays ahead of a cloud company that has read the mail but not the way, and keeps Phonemos under the mountain.
 
 ## Background story
 
-Decades ago, Uncle Bruno, a restless marmot explorer and amateur engineer, became convinced that humanity's knowledge was fragile. Libraries burn, companies close, servers fail, and the cloud forgets what nobody pays to keep. So he spent years building a system that could hold everything worth keeping and stay in one place, under the rock, where no one could sell it.
+Decades ago, Uncle Bruno, a restless marmot explorer and amateur engineer, became convinced that humanity's knowledge was fragile. Libraries burn, companies close, servers fail, and the cloud forgets what nobody pays to keep. So he spent years building a system that could hold everything worth keeping and stay in one place, under the rock, where no one could destroy it.
 
 He called it Phonemos.
 
-He built it inside an old Cold War civil-defence fortress beneath a peak above the Bernese Oberland, a concrete bunker designed to survive almost anything. Its steel door is stamped ZIVILSCHUTZ, and above its entrance is carved the motto he chose for it: "Wissen ist ewig" (Knowledge is eternal).
+He built it inside an old Cold War Swiss army-defence fortress beneath a peak in the Bernese Oberland, a concrete bunker designed to survive almost anything. Its steel door is stamped A9756, and above its entrance is carved the motto he chose for it: "Wissen ist ewig" (Knowledge is eternal).
 
-Bruno disappeared before the system was finished. He left behind a trail of clues: a letter, a notebook, and a mountain hut that appears on no map.
+Bruno never came back from his adventure. But now he needs a new keeper and maintainer and sends a puzzling letter to Märmu. He left behind a trail of clues.
 
-Now a company called Cumulus Dump AG has learned that the bunker exists. Its business is collecting data from everyone and storing it in its own commercial cloud, under terms nobody reads. It wants Phonemos, and the wisdom inside it, for itself. It has hired an eagle, a ruthless agent with sharp eyes and no patience, to find the bunker and take it over.
+Cumulus Dump AG secretly reads the mail. From Bruno's letter they learn that a marmot has been told to bring a rope, and that Bruno wants a new keeper. They do not learn where the bunker is. The letter never says. Their business is collecting data from everyone and storing it in their own commercial cloud, under terms nobody reads. They want Phonemos. They have hired an eagle, a ruthless agent with sharp eyes and no patience, to find the bunker and take it over.
 
 Märmu has to get there first, and stop them.
 
@@ -26,27 +26,30 @@ Märmu has to get there first, and stop them.
 
 **Uncle Bruno.** Märmu's long-lost uncle. A brilliant, eccentric explorer who built Phonemos to protect humanity's knowledge. He is older, slower, and more stubborn than he was, and he has been living in the bunker's canteen with a coffee machine and a pile of notebooks. His flaw is that he trusts his own plans more than other people's help.
 
-**The Eagle (Agent Falke).** Cumulus Dump's enforcer. Calm, precise, and convinced that all knowledge is only valuable when someone owns it. He speaks politely, which makes him more frightening. He suspects that Märmu holds the key to the bunker.
+**The Eagle (Agent Falke).** Cumulus Dump's enforcer. Calm, precise, and convinced that all knowledge is only valuable when someone owns it. He speaks politely, which makes him more frightening. On the mountain he decides the notebook in Märmu's paws is the map. It is not.
 
 **Cumulus Dump AG's CEO (Herr Wolke).** Gray, bushy, cloud-shaped hair that seems to float slightly above his head, and a sharp grey suit that never wrinkles. His hair is a running visual joke, and it can drift or puff up when he gets excited or angry.
 
-The face of the company. Charming, optimistic, and always talking about "trust" and "seamless access." He promises to keep the world's knowledge "safe in the cloud." He is never seen in the game until the final chapter.
+The face of the company. Charming, optimistic, and always talking about "trust" and "seamless access." He promises to keep the world's knowledge "safe in the cloud." But he is corrupted and can't resist making money. As soon as money is offered, he forgets all the good intentions. He is not really evil, just morally weak and influencable. In the village he does the hunting himself, and he is bad at it. He never recognizes the marmot in front of him.
 
-**The Steinbock (Ibex).** An old cliff-dweller who knows the mountain's hidden paths. Gruff and cryptic. He has been waiting years for someone to ask him the right question.
+**The Steinbock (Ibex).** An old cliff-dweller. He meets Märmu on the far side of the gorge, shows him the way to the hut, and rams Falke when the eagle tries to take the notebook.
 
-**The Crow.** A gossiping bird who claims to have seen Bruno, and who has opinions about everyone's shoes.
+**The Crow.** A gossip. He joins Märmu at the gondola, comments on everything, and stays outside the cave talking with the ibex. That conversation is how Wolke and Falke find the bunker.
 
 ### Village characters
 
 - Dairy owner: practical, suspicious of strangers, deeply loyal to the valley.
 - Ticket clerk at the cable car: rules-obsessed, secretly sentimental.
 - Village elder: keeper of old songs and old stories, and the first to warn Märmu about the company.
+- A mountain biker, passing through. He is struggling to fix his bike and does not want to give anything away.
 
 ## Setting
 
+**The Burrow.** A cozy marmot house in the Alps. The rooms are round earthworks, inside normal human inventory in marmot size (kitchen, table, ...). In front of the house with a round door, there is a mailbox where Märmu finds the letter.
+
 **The Village.** A small, sunny Bernese village with a dairy, a church bell tower, a cable car station, and a village workshop. Cows graze in summer and the valley smells of cheese.
 
-**The Mountain.** Rock, glacier, and waterfall, with an abandoned alpine dairy, a rope bridge over a gorge, an ice cave, and a stone shepherd's hut.
+**The Mountain.** A trail above the tree line. Where the trail has slipped, a bridge is still visible and cannot be reached, with a gorge below it. The shepherd's hut is further on.
 
 **The Bunker.** A hidden Cold War fortress inside the peak: concrete corridors, humming fluorescent tubes, blinking server racks, and a central control room with a single glowing terminal. The canteen has a coffee machine, and somewhere a radio plays old Swiss folk songs.
 
@@ -63,98 +66,106 @@ Design method:
 
 ### Chapter 1: The Letter (Opening)
 
-Märmu finds a letter in his mailbox, a tin cup nailed to a fence post at the edge of his burrow. It is from Uncle Bruno, who vanished years ago. The letter warns that the first snow will close the pass soon, and that someone else is looking for the same thing.
+Märmu finds a letter in his mailbox, a tin cup nailed to a fence post at the edge of his burrow. It is from Uncle Bruno, who vanished years ago. The first snow will close the pass soon, and someone else is already reading the post. The letter does not say where Bruno is. It names what to bring:
+
+- A rope. A rope is always useful in the mountains.
+- The notebook the village elder is keeping. Read it.
+- The sluice key, from the workshop shelf.
+- The cheese wheel he made, waiting at the dairy. It is a gift. It is not for sale.
+
+The keeper's word is not in the letter. Bruno writes that it is spoken, and never written.
 
 Goal: Leave the burrow and reach the village.
 
 ### Chapter 2: The Village (Act I)
 
-Märmu gathers supplies and learns the way to the glacier. He needs a ticket on the last cable car before it closes for the season.
+The goal is the valley station. The gondola is the last car before the snow closes the pass. The clerk will not start it until Märmu is carrying what the letter names: the rope, the notebook, the sluice key, and the cheese wheel. The old tire and the soft rod are not on the list. Both are still in the village, and he needs them too.
 
-Items earned: Rope (from the dairy owner, traded for a rare wildflower), Cheese grater (the dairy owner's), Mirror (from the village workshop), Sluice key (a real steel key from the village workshop), and Bendable rod (a soft-steel rod from the same shelf that looks like a sluice key but bends when forced).
+Herr Wolke walks through every scene. He does not recognize Märmu. He asks whether anyone has seen someone asking for a rope. He does not know where the bunker is.
 
-Puzzles: Persuade the dairy owner to lend the rope. Repair a broken gondola using the workshop's tools. Convince the ticket clerk that his letter is genuine.
+**The dairy.** Wolke is in the shop, asking about a rope. Märmu does not say the word. The cheese wheel he made is in the cellar, and the hoist rope is frayed. The owner is finished with it. Märmu climbs down, brings up the wheel, and the owner gives him the old rope because the dairy cannot use it. Wolke hears a marmot collecting cheese.
 
-Warning: A man in a grey suit asks the ticket clerk about a "marmot with a map." Cumulus Dump has arrived.
+**The elder.** When Wolke is out of the room, the elder warns Märmu about the man in the grey suit and gives him the notebook. Märmu reads it there. The cheese recipe in it was given to the valley, not sold. There is no map in it.
+
+**The workshop.** The letter asks for the sluice key. Two pieces on the shelf look the same. One is the key. The other is a soft rod, and it does not look like a second tool. Märmu tries them on a stuck drawer. The rod bends and will not turn. The key does. He keeps both. Anyone looking for what the letter named will look for the key. The rod travels as its double.
+
+**The biker.** He is struggling to fix his bike and will not give anything away. Märmu helps him finish the repair. The old broken tire is left over. That tire is what he will use at the hut.
+
+The clerk reads the letter, finds the four named things in Märmu's paws, and the last car leaves. The crow gets on with him, already talking.
 
 ### Chapter 3: The Mountain (Act II)
 
-The gondola stops above the tree line, and the trek begins. Märmu crosses a gorge, climbs the ice, and finds Bruno's trail.
+Märmu leaves the gondola and follows a mountain trail. The crow is with him the whole way, commenting and talking.
 
-Items earned: Alphorn (from the shepherd's hut), Crystal (from the ice cave), Crow's feather (the crow gives it to him in exchange for a riddle), Notebook of Bruno (found in the abandoned dairy).
+The trail has slipped down a steep slope. A bridge is still there, at the back of the scene, and Märmu cannot reach it. He ties the dairy's old rope to a stone lying at the break, throws the stone across to the mountain on the other side, and climbs over the gorge. He did not bring the stone.
 
-Puzzles: Use the alphorn to wake a sleeping avalanche-dog so it moves aside. Follow the ibex's path by reading scratched symbols on rocks. Decode Bruno's notebook, where the recipe measurements are actually map coordinates.
+On the far side the ibex greets him and shows him the way to the hut. The crow stays with both of them and keeps talking.
 
-Antagonist beat: The eagle appears and tries to take the notebook. Märmu escapes, but the notebook's cover is torn.
+On that trail Agent Falke drops out of the sky. He thinks the notebook is the way to Bruno. He and Märmu fight over it. It breaks. The pages tear into pieces and snippets and fall into the gorge. The ibex rams Falke. Falke disappears with empty hands. He has no map, because there never was one in the book, and he did not get to read the recipe either. Märmu already did. When they can no longer see Falke, they go on.
+
+Items earned: none. The rope stays on the gorge. The notebook is gone. Märmu already read the recipe. The letter, which he still has, is what says the keeper's word is spoken and never written.
 
 ### Chapter 4: The Hütte (Midpoint)
 
-Märmu finds the hut Bruno described, and the entrance to the bunker behind a waterfall. Cumulus Dump is already there, drilling into the rock.
+The ibex leads Märmu to the hut, and the crow comes with them. The hut is empty. The shepherd has gone down to the village with the Alp cheese. Sheep, a group of cattle and goats, and a sleepy Bernese mountain dog are still there. None of them care. The ibex and the crow do.
 
-Key reveal: Bruno is alive, and he is the reason the bunker exists.
+Behind the hut, a stream comes down from a waterfall. The cave behind the waterfall is the way into the bunker. Märmu has to cross the stream to reach it.
 
-Puzzle: Divert the waterfall, or use the crow to distract Cumulus Dump's drill crew, so Märmu can reach the steel door unseen.
+Next to the hut are a chopping block and an axe, and no wood. A bridge cannot be built.
 
-Items earned: Wax-sealed tapes (from the hut's old storage shelves, labelled by year).
+Märmu has the biker's old tire from the village. He fixes it between the hut and a fence, and the ibex pulls it back and lets go. The tire catapults Märmu over the stream.
+
+The crow watches and comments on all of it. When Märmu goes into the cave and on into the bunker, the crow does not follow. The crow stays outside, talking with the ibex. Cumulus Dump is not here yet. This is where Falke and Wolke later find the crow, and hear where Märmu went.
+
+Items earned: none. The ibex is how Märmu finds the hut. The rubber band is used here and is not found here.
 
 ### Chapter 5: The Bunker (Final Act)
 
-The steel door opens onto Phonemos. Bruno is in the canteen. The eagle breaks in, and the terminal needs three keys to unlock.
+The steel door opens onto the canteen, not onto a solved Phonemos. Bruno is there. This is where Märmu learns Bruno is alive.
 
-Narrative beats:
+Beats, in order:
 
-- **Reunion:** Bruno explains what Phonemos is and why he hid it.
-- **The negotiation:** Herr Wolke arrives in person and negotiates with the marmots, offering to take Phonemos off their hands and "keep it safe" in the cloud. Bruno is tired and tempted, and the marmots disagree with each other and with Wolke.
-- **The breaking point:** When the marmots refuse, Wolke loses his temper, his cloud-shaped hair puffing up as he shouts, "When I cannot have it, nobody shall have it!" He runs to the power room, where a hidden underground water current drives the whole bunker. He plans to sabotage the power plant and plunge Phonemos into darkness.
-- **The climax:** Märmu has to stop him before the turbines fail. He has three ways to do it (see Climax routes). In every version, Wolke collapses sobbing.
-- **The resolution:** Märmu types the final command, and the wiki comes alive. The first page is a warm, hand-drawn map of the valley, with the words "Welcome home, Märmu."
-
-Puzzles, in order (before Wolke arrives):
-
-1. **Fire-door sequence:** The corridors are sealed by switches that must be set in the order of a poem in Bruno's notebook. The player cross-checks the verses against the switch labels. A wrong order sets off a warning siren, and Märmu simply retries.
-2. **The canteen reunion:** Bruno's coffee machine has stopped. Märmu fixes it by swapping the dead fuse for the crystal from the ice cave. Bruno explains Phonemos and why he hid it. This scene is a breather with no pressure.
-3. **Cooling the servers:** The racks overheat, and the terminal shows a temperature warning. Märmu fixes the gondola pulley to a ceiling beam and routes cold glacier water up through a shaft using the rope and the old pipes. The warning light drops when it works.
-4. **Data recovery:** A drive is damaged. The wax-sealed tapes from the hut must be stacked in order, and the tape labels show the years written in Bruno's notebook.
-5. **The dark archive:** One room has no power. Märmu uses the mirror to redirect daylight down the ventilation shaft. The room holds Phonemos's first backup, which contains the proof that Cumulus Dump plans to delete the archive.
-6. **The hatch and the alphorn:** A sealed hatch blocks the passage to the power room. The ventilation pipes resonate, and the player must find the pipe that matches the alphorn's note to shake the lock loose.
-7. **The three keys:** The control-room terminal needs a codeword (from Bruno's notebook), a physical key (the cheese grater), and a signature (the crow's feather). Missing any one locks the terminal. When all three are entered, the terminal shows its first page, but it also pings Cumulus Dump, which triggers Wolke's arrival.
-8. **The power room door:** Märmu opens the locked door with the real sluice key, the same key he keeps when he hands Wolke the bendable rod in Route 3. Wolke runs through, and the climax begins.
+1. **Reunion and the machine.** Bruno has been living with a dead coffee machine because he would rather keep a bad plan than ask for help. The water hose has slipped behind it, where he cannot reach. He asks. Märmu is small enough to push the hose back on. The machine works. There is no coffee left.
+2. **Fetch the coffee.** The beans are kept past Phonemos, in the cool room. The canteen is too warm. The terminal is in the way. It opens the far door for the motto carved over the bunker entrance, "Wissen ist ewig," which Märmu saw on the way in. That opens a passage. It is not the owner's word. He takes the coffee and comes back.
+3. **The return.** Wolke and Falke are already in the canteen. Märmu walks in on them. Wolke is pleased to explain: the crow stayed outside with the ibex and told them the way. Bruno, alone with them, has said which room Phonemos is in. He has not said the word. He thought the room without the word would be enough of a plan.
+4. **The login.** Wolke jumps around, hair puffing, and tries to log in. He knows from the letter that the word was never written down. Bruno will not speak it. The torn notebook in the gorge cannot help him either.
+5. **The breaking point.** Wolke screams that if he cannot have it, nobody can, and runs ahead to the water power plant. Falke does not run with him. He is still at the terminal. Route 2 is what brings him to the plant. Route 3 happens while he is still back at the screen.
+6. **The climax.** Märmu stops Wolke at the plant. Three ways, below. In every version, Wolke collapses sobbing.
+7. **The resolution.** Bruno speaks the word to Märmu, because the letter was for him. Märmu types it. The wiki comes alive. The first page is a warm, hand-drawn map of the valley, with the words "Welcome home, Märmu."
 
 ## Inventory map
 
+Only items a later beat still uses. The gondola checks the letter, not a hidden list. The old tire is not on the letter. Märmu still has to leave with it.
+
 | Item | Chapter earned | Used in | Purpose |
 | --- | --- | --- | --- |
-| Rope | 2 (Village) | 5 (Bunker) | Pulling cooling pipes |
-| Cheese grater | 2 (Village) | 5 (Bunker) | Physical key |
-| Mirror | 2 (Village) | 5 (Bunker) | Redirecting daylight into the dark archive |
-| Alphorn | 3 (Mountain) | 5 (Bunker) | Shaking the hatch lock loose through the pipes |
-| Crystal | 3 (Mountain) | 5 (Bunker) | Fixing the coffee machine fuse and powering the cooling system |
-| Wax-sealed tapes | 4 (Hütte) | 5 (Bunker) | Repairing the damaged drive |
-| Crow's feather | 3 (Mountain) | 5 (Bunker) | Signature key |
-| Notebook of Bruno | 3 (Mountain) | 5 (Bunker) | Codeword and fire-door poem |
-| Map fragments (x3) | 1, 2, 3 | 4 (Hütte) | Locating the bunker entrance |
-| Sluice key | 2 (Village) | 5 (Bunker) | Real key for the turbine gate later in the bunker |
-| Bendable rod | 2 (Village) | 5 (Bunker) | Looks like the sluice key; bends when forced (Route 3 decoy) |
+| Cheese wheel | 2 (Dairy) | 5 (Bunker) | The wheel Märmu made, named in the letter. He carries it up from the cellar. Route 1. Wolke tries to pay, and it is a gift. |
+| Sluice key | 2 (Workshop) | 5 (Bunker) | Named in the letter. It is the object everyone will look for. Märmu keeps it. Handing it to Wolke would open the turbine gate, so he does not. |
+| Bendable rod | 2 (Workshop) | 5 (Bunker) | Not named in the letter. It sits beside the key and looks like it. It bends in the workshop drawer, and it bends again in the turbine gate. The key is what hides it. |
+| Rope | 2 (Dairy) | 3 (Mountain) | The frayed hoist rope. Märmu never asks for it while Wolke is listening. Tied to a stone and thrown across the slipped trail. |
+| Notebook of Bruno | 2 (Elder) | 2, then 3 | Read in the elder's house: a cheese recipe given away, and no map. Falke thinks it is the way to Bruno. It breaks over the gorge. Märmu remembers the recipe. Wolke cannot read the pages. |
+| Rubber band | 2 (Biker) | 4 (Hütte) | The biker's old broken tire. Not on the letter. Fixed between the hut and the fence. The ibex pulls it and catapults Märmu over the stream. |
+| Coffee | 5 (Bunker), past Phonemos | 5 (Bunker) | What Bruno sends Märmu to fetch. Brought back to the canteen. |
 
-Route 1 also uses a cheese wheel Märmu made himself. It is not on the earned-item list above; in the playable finale he still has it from the village.
+The crow is not an item. He rides the gondola, stays outside the cave with the ibex, and tells Wolke and Falke the way. The stone, the axe, and the chopping block are not items either. The stone is already at the broken trail. There is nothing for the axe to cut. The hose behind the coffee machine is not an item. Märmu reaches it because he is small. The motto over the door is not an item. He reads it on the way in.
 
 ## Antagonists
 
 Cumulus Dump AG is a cloud storage and data company. Its slogan is "Access anywhere, forever." It collects data from its users and stores it under terms nobody reads. Its goal is to acquire Phonemos and upload the world's knowledge into its commercial cloud, where it can be sold, mined, and controlled.
 
-Herr Wolke is the CEO. He believes knowledge is only valuable when it is accessible, and that accessibility requires ownership. He appears in person only in the final chapter, when he negotiates inside the bunker.
+Herr Wolke is the CEO. He believes knowledge is only valuable when it is accessible, and that accessibility requires ownership. In the village he walks from scene to scene and does not recognize Märmu. He asks whether anyone has seen someone asking for a rope, because that is what Bruno's letter told Märmu to bring. He appears again in the bunker, when Märmu comes back with the coffee and finds him interrogating Bruno.
 
-Agent Falke is the eagle, Cumulus Dump's enforcer, and the game's main physical threat. He is the one who pursues Märmu through the mountain.
+Agent Falke is the eagle, Cumulus Dump's enforcer, and the game's main physical threat. He attacks Märmu for the notebook and leaves with nothing. He finds the bunker because the crow, still outside the cave with the ibex, tells him the way. When Wolke runs for the plant, Falke is still at the terminal.
 
 ## Climax routes
 
 Märmu has three ways to stop Herr Wolke at the power plant. Each route is tied to items collected earlier, and each ends with Wolke collapsing sobbing. The tone stays light: the villain is more ridiculous than frightening, and nobody gets hurt.
 
-**Route 1: Convince him money is not everything.** Wolke measures everything by its price, so Märmu shows him what can't be bought. He opens Phonemos's contributors page, where the village elder, the dairy owner, and the ticket clerk have written entries for free, and Bruno's notebook contains a cheese recipe that was given away, not sold. Märmu offers Wolke a cheese wheel he made himself, and when Wolke tries to pay for it, Märmu simply says it's a gift. The crow's feather, passed from neighbour to neighbour, shows Wolke what trust is worth. Wolke realises he has no way to buy what the village gives each other, and he collapses sobbing.
+**Route 1: Convince him money is not everything.** Wolke measures everything by its price, so Märmu shows him what can't be bought. Phonemos's contributors page has the elder, the dairy owner, and the ticket clerk, writing for nothing. Märmu remembers the recipe from the lost notebook: it was given to the valley, not sold. He offers Wolke the cheese wheel, and when Wolke tries to pay, Märmu says it is a gift. Wolke realises he has no price for what the valley gives away, and he collapses sobbing.
 
-**Route 2: Convince Agent Falke to turn.** Falke is loyal to his contract, so Märmu has to show him that the contract betrays what he cares about. The notebook and the wiki contain a record of Falke's own family: a rescued eagle, ringed and released in the Alps decades ago, whose descendants are named in the valley's archive. Märmu shows him Cumulus Dump's terms of service, which let the company delete any "non-commercial data" without notice, and that includes the archive. Falke realises his employers would erase his own history to make room for storage. Falke does not attack or block the door. He walks calmly up to Wolke, lays one wing on his shoulder, and quietly says: "I think it is enough, Wolke." Falke uses his authority as Cumulus Dump's enforcer: the company's own security chief has ordered the operation stopped, and Falke's word carries the weight of the company behind it. Wolke's hair deflates, his plan falls apart, and he collapses sobbing.
+**Route 2: Convince Agent Falke to turn.** Falke stays at the terminal Wolke could not open. Phonemos already holds the valley archive, and Märmu can show the page: a rescued eagle, ringed and released in these Alps, and the descendants still named there. The login Wolke left on screen shows Cumulus Dump's terms, which let the company delete any non-commercial data without notice. That includes the archive. Falke does not attack. He follows Wolke to the plant, lays one wing on his shoulder, and says: "I think it is enough, Wolke." He was hired to take the bunker. He will not. Wolke's hair deflates, and he collapses sobbing.
 
-**Route 3: Outsmart him with a fake tool.** Wolke shouts to Falke that he needs the sluice key to open the turbine gate. Falke is nowhere to be found, so Märmu brings a key instead. He has two to choose from: the real sluice key, which he keeps for the gate later in the bunker, and the bendable rod, which looks exactly like one. Märmu hands Wolke the bendable rod. Wolke grabs it, forces it into the gate's lock, and it bends with a metallic groan. The gate doesn't move, and he collapses sobbing as his grand plan falls apart.
+**Route 3: Outsmart him with the double.** Wolke shouts for Falke to bring the sluice key. Falke is still at the terminal, so nobody brings it. Märmu has two pieces that look the same. The real key would open the gate. He keeps it. He holds out the rod, which the key has been hiding since the workshop. Wolke grabs it, forces it into the lock, and it bends with a metallic groan. The gate does not move, and he collapses sobbing.
 
 ## Endings
 
@@ -162,7 +173,7 @@ Märmu has three ways to stop Herr Wolke at the power plant. Each route is tied 
 
 ## Winter and urgency
 
-Winter is coming, and the first snow will close the pass. Märmu is a marmot, and marmots hibernate, so his body is always pulling him toward sleep. This creates a quiet, constant pressure on the player.
+Winter is coming, and the first snow will close the pass. That is why the gondola in the village is the last car, and why the clerk will not wait past the letter's list. Märmu is a marmot, and marmots hibernate, so his body is always pulling him toward sleep. This is pressure and comedy. It is not a way to lose.
 
 Mechanics:
 
@@ -179,4 +190,4 @@ Warm, funny, and sincere, with a light mystery. The humor comes from Märmu's ea
 
 ## In the game
 
-Chapter 1 on the menu is the opening, The Letter. Chapter 10 on the menu is this final bunker chapter, so the ending can be tested before chapters 2 to 9 exist. Starting chapter 10 gives Märmu the inventory the bunker puzzles need, including the cheese wheel for the first climax route. The notebook he carries holds the fire-door poem, the tape years 1962, 1974 and 1989, and the terminal word WISSEN.
+Chapter 1 on the menu is the opening, The Letter. Chapter 10 on the menu is an earlier playable draft of the bunker, from before this structure. It still uses the old puzzles (fuse, pipes, tapes, mirror, alphorn, and a three-part login). It does not match the beats above.
